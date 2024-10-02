@@ -1,0 +1,192 @@
+{
+  "name": "better-json5",
+  "displayName": "Better JSON5",
+  "description": "JSON5 language support with proper completion and JSON schema validation ⚡",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "main": "./dist/node/clientMain.js",
+  "browser": "./dist/browser/clientMain.js",
+  "scripts": {
+    "compile-web": "webpack --mode production -c ./client-browser.webpack.config.js && webpack --mode production -c ./server-browser.webpack.config.js",
+    "compile-node": "webpack --mode production -c ./client-node.webpack.config.js && webpack --mode production -c ./server-node.webpack.config.js",
+    "watch-web": "webpack --mode development -c ./client-browser.webpack.config.js --watch && webpack --mode development -c ./server-browser.webpack.config.js --watch",
+    "compile": "yarn compile-web && yarn compile-node"
+  },
+  "icon": "./icon.png",
+  "capabilities": {
+    "virtualWorkspaces": true,
+    "untrustedWorkspaces": {
+      "supported": true
+    }
+  },
+  "activationEvents": [
+    "onLanguage:json5"
+  ],
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "json5",
+        "aliases": [
+          "JSON5",
+          "json5"
+        ],
+        "extensions": [
+          ".json5"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "json5",
+        "scopeName": "source.json5",
+        "path": "./syntaxes/json5.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "id": "json5",
+      "order": 20,
+      "type": "object",
+      "title": "JSON5",
+      "properties": {
+        "json5.schemas": {
+          "type": "array",
+          "scope": "resource",
+          "description": "%json5.schemas.desc%",
+          "items": {
+            "type": "object",
+            "default": {
+              "fileMatch": [
+                "/myfile"
+              ],
+              "url": "schemaURL"
+            },
+            "properties": {
+              "url": {
+                "type": "string",
+                "default": "/user.schema.json",
+                "description": "%json5.schemas.url.desc%"
+              },
+              "fileMatch": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "default": "MyFile.json",
+                  "description": "%json5.schemas.fileMatch.item.desc%"
+                },
+                "minItems": 1,
+                "description": "%json5.schemas.fileMatch.desc%"
+              },
+              "schema": {
+                "$ref": "http://json-schema.org/draft-07/schema#",
+                "description": "%json5.schemas.schema.desc%"
+              }
+            }
+          }
+        },
+        "json5.validate.enable": {
+          "type": "boolean",
+          "scope": "window",
+          "default": true,
+          "description": "%json5.validate.enable.desc%"
+        },
+        "json5.format.enable": {
+          "type": "boolean",
+          "scope": "window",
+          "default": true,
+          "description": "%json5.format.enable.desc%"
+        },
+        "json5.format.keepLines": {
+          "type": "boolean",
+          "scope": "window",
+          "default": false,
+          "description": "%json5.format.keepLines.desc%"
+        },
+        "json5.trace.server": {
+          "type": "string",
+          "scope": "window",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "%json5.tracing.desc%"
+        },
+        "json5.colorDecorators.enable": {
+          "type": "boolean",
+          "scope": "window",
+          "default": true,
+          "description": "%json5.colorDecorators.enable.desc%",
+          "deprecationMessage": "%json5.colorDecorators.enable.deprecationMessage%"
+        },
+        "json5.maxItemsComputed": {
+          "type": "number",
+          "default": 5000,
+          "description": "%json5.maxItemsComputed.desc%"
+        },
+        "json5.schemaDownload.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "%json5.enableSchemaDownload.desc%",
+          "tags": [
+            "usesOnlineServices"
+          ]
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[json5]": {
+        "editor.quickSuggestions": {
+          "strings": true
+        },
+        "editor.suggest.insertMode": "replace"
+      }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": "*.schema.json5",
+        "url": "http://json-schema.org/draft-07/schema#"
+      }
+    ],
+    "commands": [
+      {
+        "command": "json5.clearCache",
+        "title": "%json5.command.clearCache%",
+        "category": "JSON5"
+      },
+      {
+        "command": "json5.sort",
+        "title": "%json5.command.sort%",
+        "category": "JSON5"
+      }
+    ]
+  },
+  "dependencies": {
+    "@blueglassblock/json5-kit": "^0.1.0",
+    "@blueglassblock/json5-languageservice": "^0.1.2",
+    "@vscode/l10n": "^0.0.18",
+    "request-light": "^0.8.0",
+    "vscode-languageclient": "10.0.0-next.8",
+    "vscode-languageserver": "10.0.0-next.6",
+    "vscode-uri": "^3.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "20.x",
+    "@types/vscode": "^1.93.0",
+    "@vscode/test-web": "^0.0.60",
+    "@vscode/vsce": "^3.1.1",
+    "assert": "^2.1.0",
+    "process": "^0.11.10",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.2",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "packageManager": "yarn@4.5.0"
+}
