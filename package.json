@@ -6,6 +6,10 @@
   "engines": {
     "vscode": "^1.93.0"
   },
+  "publisher": "BlueGlassBlock",
+  "repository": {
+    "url": "https://github.com/BlueGlassBlock/better-json5"
+  },
   "main": "./dist/node/clientMain.js",
   "browser": "./dist/browser/clientMain.js",
   "scripts": {
