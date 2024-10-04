@@ -2,7 +2,7 @@
   "name": "better-json5",
   "displayName": "Better JSON5",
   "description": "JSON5 language support with proper completion and JSON schema validation ⚡",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -13,10 +13,9 @@
   "main": "./dist/node/clientMain.js",
   "browser": "./dist/browser/clientMain.js",
   "scripts": {
-    "compile-web": "webpack --mode production -c ./client-browser.webpack.config.js && webpack --mode production -c ./server-browser.webpack.config.js",
-    "compile-node": "webpack --mode production -c ./client-node.webpack.config.js && webpack --mode production -c ./server-node.webpack.config.js",
-    "watch-web": "webpack --mode development -c ./client-browser.webpack.config.js --watch && webpack --mode development -c ./server-browser.webpack.config.js --watch",
-    "compile": "yarn compile-web && yarn compile-node"
+    "compile-dbg": "webpack --mode development",
+    "compile": "webpack --mode production",
+    "package": "npm run compile && vsce package --no-yarn"
   },
   "icon": "./icon.png",
   "capabilities": {
