@@ -2,7 +2,7 @@
   "name": "better-json5",
   "displayName": "Better JSON5",
   "description": "JSON5 language support with proper completion and JSON schema validation ⚡",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -110,6 +110,41 @@
           "default": false,
           "description": "%json5.format.keepLines.desc%"
         },
+        "json5.format.trailingCommas": {
+          "type": "string",
+          "scope": "window",
+          "enum": [
+            "keep",
+            "none",
+            "all"
+          ],
+          "default": "keep",
+          "description": "%json5.format.trailingCommas.desc%"
+        },
+        "json5.format.keyQuotes": {
+          "type": "string",
+          "scope": "window",
+          "enum": [
+            "keep",
+            "double",
+            "single",
+            "none-double",
+            "none-single"
+          ],
+          "default": "keep",
+          "description": "%json5.format.keyQuotes.desc%"
+        },
+        "json5.format.stringQuotes": {
+          "type": "string",
+          "scope": "window",
+          "enum": [
+            "keep",
+            "double",
+            "single"
+          ],
+          "default": "keep",
+          "description": "%json5.format.stringQuotes.desc%"
+        },
         "json5.trace.server": {
           "type": "string",
           "scope": "window",
@@ -171,8 +206,8 @@
     ]
   },
   "dependencies": {
-    "@blueglassblock/json5-kit": "^0.1.0",
-    "@blueglassblock/json5-languageservice": "^0.1.2",
+    "@blueglassblock/json5-kit": "^0.2.0",
+    "@blueglassblock/json5-languageservice": "^0.2.0",
     "@vscode/l10n": "^0.0.18",
     "request-light": "^0.8.0",
     "vscode-languageclient": "10.0.0-next.8",
@@ -185,6 +220,7 @@
     "@vscode/test-web": "^0.0.60",
     "@vscode/vsce": "^3.1.1",
     "assert": "^2.1.0",
+    "ovsx": "^0.9.5",
     "process": "^0.11.10",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.2",

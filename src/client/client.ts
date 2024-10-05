@@ -79,7 +79,12 @@ namespace SchemaAssociationNotification {
 type Settings = {
 	json?: {
 		schemas?: JSONSchemaSettings[];
-		format?: { enable?: boolean };
+		format?: {
+			enable?: boolean,
+			trailingCommas?: 'keep' | 'none' | 'all',
+			keyQuotes?: 'keep' | 'single' | 'double' | 'none-single' | 'none-double',
+			stringQuotes?: 'keep' | 'single' | 'double',
+		};
 		keepLines?: { enable?: boolean };
 		validate?: { enable?: boolean };
 		resultLimit?: number;
@@ -102,6 +107,9 @@ export type JSONSchemaSettings = {
 export namespace SettingIds {
 	export const enableFormatter = 'json5.format.enable';
 	export const enableKeepLines = 'json5.format.keepLines';
+	export const trailingCommas = 'json5.format.trailingCommas';
+	export const keyQuotes = 'json5.format.keyQuotes';
+	export const stringQuotes = 'json5.format.stringQuotes';
 	export const enableValidation = 'json5.validate.enable';
 	export const enableSchemaDownload = 'json5.schemaDownload.enable';
 	export const maxItemsComputed = 'json5.maxItemsComputed';
@@ -508,9 +516,8 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 			updateFormatterRegistration();
 		} else if (e.affectsConfiguration(SettingIds.enableSchemaDownload)) {
 			updateSchemaDownloadSetting();
-		} else if (e.affectsConfiguration(SettingIds.editorFoldingMaximumRegions) || e.affectsConfiguration(SettingIds.editorColorDecoratorsLimit)) {
-			client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings() });
 		}
+		client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings() });
 	}));
 
 	toDispose.push(createLanguageStatusItem(documentSelector, (uri: string) => client.sendRequest(LanguageStatusRequest.type, uri)));
@@ -648,7 +655,7 @@ function getSettings(): Settings {
 		},
 		json: {
 			validate: { enable: configuration.get(SettingIds.enableValidation) },
-			format: { enable: configuration.get(SettingIds.enableFormatter) },
+			format: { enable: configuration.get(SettingIds.enableFormatter), trailingCommas: configuration.get(SettingIds.trailingCommas), keyQuotes: configuration.get(SettingIds.keyQuotes), stringQuotes: configuration.get(SettingIds.stringQuotes), },
 			keepLines: { enable: configuration.get(SettingIds.enableKeepLines) },
 			schemas,
 			resultLimit: resultLimit + 1, // ask for one more so we can detect if the limit has been exceeded

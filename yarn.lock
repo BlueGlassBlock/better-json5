@@ -142,23 +142,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueglassblock/json5-kit@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@blueglassblock/json5-kit@npm:0.1.0"
-  checksum: 10c0/1df7bf5d8c47f82e64cd3c22b506dc24d0a3aef9d1902b6ff0332d8de171e7221902551ed83b324ae3686e70c1415e4d847290efde14d6e35ff171664e1fbe58
+"@blueglassblock/json5-kit@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@blueglassblock/json5-kit@npm:0.2.0"
+  checksum: 10c0/2f93af2bc0e66c0d72313907509bf93ddac7c27557fc3eade91a99868b5d6ca1e97ae6998da9c38815be20912d8fb36a80ebc327de220aaca5cc75f2816e7b33
   languageName: node
   linkType: hard
 
-"@blueglassblock/json5-languageservice@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "@blueglassblock/json5-languageservice@npm:0.1.2"
+"@blueglassblock/json5-languageservice@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "@blueglassblock/json5-languageservice@npm:0.2.0"
   dependencies:
-    "@blueglassblock/json5-kit": "npm:^0.1.0"
+    "@blueglassblock/json5-kit": "npm:^0.2.0"
     "@vscode/l10n": "npm:^0.0.18"
     vscode-languageserver-textdocument: "npm:^1.0.12"
     vscode-languageserver-types: "npm:^3.17.5"
     vscode-uri: "npm:^3.0.8"
-  checksum: 10c0/6fc7f8283803f163cc567c4f31456cf5e8da686f304c6295a4932b70c11daefac70f87efd1748abc3d039f5d3f28881a67d36a449492743c2a0c4d9d8f737337
+  checksum: 10c0/3b8a8818708c268a9e97f7ac15f043f0e930b3dd2026fb07d3ffecd591a2747bd25ec56868744e4fd39b269176aea1031f0f31db1b557e9da5367155fa7acd40
   languageName: node
   linkType: hard
 
@@ -463,7 +463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:^3.1.1":
+"@vscode/vsce@npm:^3.1.0, @vscode/vsce@npm:^3.1.1":
   version: 3.1.1
   resolution: "@vscode/vsce@npm:3.1.1"
   dependencies:
@@ -937,14 +937,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "better-json5@workspace:."
   dependencies:
-    "@blueglassblock/json5-kit": "npm:^0.1.0"
-    "@blueglassblock/json5-languageservice": "npm:^0.1.2"
+    "@blueglassblock/json5-kit": "npm:^0.2.0"
+    "@blueglassblock/json5-languageservice": "npm:^0.2.0"
     "@types/node": "npm:20.x"
     "@types/vscode": "npm:^1.93.0"
     "@vscode/l10n": "npm:^0.0.18"
     "@vscode/test-web": "npm:^0.0.60"
     "@vscode/vsce": "npm:^3.1.1"
     assert: "npm:^2.1.0"
+    ovsx: "npm:^0.9.5"
     process: "npm:^0.11.10"
     request-light: "npm:^0.8.0"
     ts-loader: "npm:^9.5.1"
@@ -1179,6 +1180,13 @@ __metadata:
   version: 1.0.4
   resolution: "chrome-trace-event@npm:1.0.4"
   checksum: 10c0/3058da7a5f4934b87cf6a90ef5fb68ebc5f7d06f143ed5a4650208e5d7acae47bc03ec844b29fbf5ba7e46e8daa6acecc878f7983a4f4bb7271593da91e61ff5
+  languageName: node
+  linkType: hard
+
+"ci-info@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ci-info@npm:2.0.0"
+  checksum: 10c0/8c5fa3830a2bcee2b53c2e5018226f0141db9ec9f7b1e27a5c57db5512332cde8a0beb769bcbaf0d8775a78afbf2bb841928feca4ea6219638a5b088f9884b46
   languageName: node
   linkType: hard
 
@@ -1810,6 +1818,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"follow-redirects@npm:^1.14.6":
+  version: 1.15.9
+  resolution: "follow-redirects@npm:1.15.9"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: 10c0/5829165bd112c3c0e82be6c15b1a58fa9dcfaede3b3c54697a82fe4a62dd5ae5e8222956b448d2f98e331525f05d00404aba7d696de9e761ef6e42fdc780244f
+  languageName: node
+  linkType: hard
+
 "for-each@npm:^0.3.3":
   version: 0.3.3
   resolution: "for-each@npm:0.3.3"
@@ -2234,6 +2252,17 @@ __metadata:
   version: 1.2.7
   resolution: "is-callable@npm:1.2.7"
   checksum: 10c0/ceebaeb9d92e8adee604076971dd6000d38d6afc40bb843ea8e45c5579b57671c3f3b50d7f04869618242c6cee08d1b67806a8cb8edaaaf7c0748b3720d6066f
+  languageName: node
+  linkType: hard
+
+"is-ci@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "is-ci@npm:2.0.0"
+  dependencies:
+    ci-info: "npm:^2.0.0"
+  bin:
+    is-ci: bin.js
+  checksum: 10c0/17de4e2cd8f993c56c86472dd53dd9e2c7f126d0ee55afe610557046cdd64de0e8feadbad476edc9eeff63b060523b8673d9094ed2ab294b59efb5a66dd05a9a
   languageName: node
   linkType: hard
 
@@ -3142,6 +3171,23 @@ __metadata:
     is-docker: "npm:^2.1.1"
     is-wsl: "npm:^2.2.0"
   checksum: 10c0/bb6b3a58401dacdb0aad14360626faf3fb7fba4b77816b373495988b724fb48941cad80c1b65d62bb31a17609b2cd91c41a181602caea597ca80dfbcc27e84c9
+  languageName: node
+  linkType: hard
+
+"ovsx@npm:^0.9.5":
+  version: 0.9.5
+  resolution: "ovsx@npm:0.9.5"
+  dependencies:
+    "@vscode/vsce": "npm:^3.1.0"
+    commander: "npm:^6.2.1"
+    follow-redirects: "npm:^1.14.6"
+    is-ci: "npm:^2.0.0"
+    leven: "npm:^3.1.0"
+    semver: "npm:^7.6.0"
+    tmp: "npm:^0.2.3"
+  bin:
+    ovsx: lib/ovsx
+  checksum: 10c0/27b8522dc5c883dc41c3fd53839e37ed390ff26f95150ed32d28070206240f51bd3eb4a12ae3cd528ef7573418fc825ffb33ff703da5d178be28304ba241c37b
   languageName: node
   linkType: hard
 

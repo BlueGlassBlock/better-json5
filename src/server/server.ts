@@ -6,12 +6,12 @@
 import {
 	Connection,
 	TextDocuments, InitializeParams, InitializeResult, NotificationType, RequestType,
-	DocumentRangeFormattingRequest, Disposable, ServerCapabilities, TextDocumentSyncKind, TextEdit, DocumentFormattingRequest, TextDocumentIdentifier, FormattingOptions, Diagnostic, CodeAction, CodeActionKind
+	DocumentRangeFormattingRequest, Disposable, ServerCapabilities, TextDocumentSyncKind, TextEdit, DocumentFormattingRequest, TextDocumentIdentifier, Diagnostic, CodeAction, CodeActionKind
 } from 'vscode-languageserver';
 
 import { runSafe, runSafeAsync } from './utils/runner';
 import { DiagnosticsSupport, registerDiagnosticsPullSupport, registerDiagnosticsPushSupport } from './utils/validation';
-import { TextDocument, JSONDocument, JSONSchema, getLanguageService, DocumentLanguageSettings, SchemaConfiguration, ClientCapabilities, Range, Position, SortOptions } from '@blueglassblock/json5-languageservice';
+import { TextDocument, JSONDocument, JSONSchema, getLanguageService, DocumentLanguageSettings, SchemaConfiguration, ClientCapabilities, Range, Position, SortOptions, FormattingOptions } from '@blueglassblock/json5-languageservice';
 import { getLanguageModelCache } from './languageModelCache';
 import { Utils, URI } from 'vscode-uri';
 import * as l10n from '@vscode/l10n';
@@ -200,7 +200,12 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	interface Settings {
 		json?: {
 			schemas?: JSONSchemaSettings[];
-			format?: { enable?: boolean };
+			format?: {
+				enable?: boolean,
+				trailingCommas?: 'keep' | 'none' | 'all',
+				keyQuotes?: 'keep' | 'single' | 'double' | 'none-single' | 'none-double',
+				stringQuotes?: 'keep' | 'single' | 'double',
+			};
 			keepLines?: { enable?: boolean };
 			validate?: { enable?: boolean };
 			resultLimit?: number;
@@ -227,6 +232,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	let formatterRegistrations: Thenable<Disposable>[] | null = null;
 	let validateEnabled = true;
 	let keepLinesEnabled = false;
+	let trailingCommasOption: undefined | 'keep' | 'none' | 'all' = undefined;
+	let keyQuotesOption: undefined | 'keep' | 'single' | 'double' | 'none-single' | 'none-double' = undefined;
+	let stringQuotesOption: undefined | 'keep' | 'single' | 'double' = undefined;
 
 	// The settings have changed. Is sent on server activation as well.
 	connection.onDidChangeConfiguration((change) => {
@@ -235,6 +243,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		jsonConfigurationSettings = settings.json?.schemas;
 		validateEnabled = !!settings.json?.validate?.enable;
 		keepLinesEnabled = settings.json?.keepLines?.enable || false;
+		trailingCommasOption = settings.json?.format?.trailingCommas;
+		keyQuotesOption = settings.json?.format?.keyQuotes;
+		stringQuotesOption = settings.json?.format?.stringQuotes;
 		updateConfiguration();
 
 		const sanitizeLimitSetting = (settingValue: any) => Math.trunc(Math.max(settingValue, 0));
@@ -438,6 +449,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	function onFormat(textDocument: TextDocumentIdentifier, range: Range | undefined, options: FormattingOptions): TextEdit[] {
 
 		options.keepLines = keepLinesEnabled;
+		options.trailingCommas = trailingCommasOption !== 'keep' ? trailingCommasOption : undefined;
+		options.keyQuotes = keyQuotesOption !== 'keep' ? keyQuotesOption : undefined;
+		options.stringQuotes = stringQuotesOption !== 'keep' ? stringQuotesOption : undefined;
 		const document = documents.get(textDocument.uri);
 		if (document) {
 			const edits = languageService.format(document, range ?? getFullRange(document), options);
