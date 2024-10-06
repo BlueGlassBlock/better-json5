@@ -1,13 +1,26 @@
+<div align="center">
+
 # better-json5 
 
-> Comprehensive support for JSON5 in Visual Studio Code
+> JSON5 support for Visual Studio Code, done right ⚡
 
 ## Features
 
-- [x] "Semantic" syntax highlighting with correctly colored keys
-- [x] JSON Schema based validation and intellisense
-- [x] Error checking
-- [x] Completely configurable formatting
+#### Syntax highlighting with correctly colored keys, with your favorite theme support out-of-the-box
+![Syntax Highlighting](./assets/highlighting.png)
+
+#### JSON Schema based validation and intellisense
+![Overview](./assets/overview.gif)
+
+#### Completely configurable formatting
+
+![Formatting](./assets/formatting.gif)
+
+#### Sorting Command
+
+![Sorting](./assets/sorting.gif)
+
+</div>
 
 ## Extension Settings
 
@@ -20,29 +33,13 @@
 - `json5.format.stringQuotes`: Control the usage of quotes for string values in objects and arrays.
 - `json5.tracing`: Traces the communication between VS Code and the JSON5 language server.
 
-## TODO
-
-- Semantic completion for strings based on user quotes preference / context (needs decision)
-
 ## Credits
 
 This extension is heavily based on the [JSON Language Features](https://github.com/microsoft/vscode/tree/main/extensions/json-language-features) extension by Microsoft.
 
 ## Changelog
 
-### 0.0.3
-
-- Implemented `json5.format.trailingCommas` setting
-- Implemented `json5.format.keyQuotes` and `json5.format.stringQuotes` settings
-- Published to <https://open-vsx.org> [#2](https://github.com/BlueGlassBlock/better-json5/issues/2)
-
-### 0.0.2
-
-- Fixed [#1](https://github.com/BlueGlassBlock/better-json5/issues/1): Extension failed to load in <https://vscode.dev>
-
-### 0.0.1
-
-- Initial release
+See [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 

@@ -1,9 +1,19 @@
-# Change Log
+# CHANGELOG
 
-All notable changes to the "better-json5" extension will be documented in this file.
+## 1.0.0
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+- Make suggestions respect quote settings
 
-## [Unreleased]
+## 0.0.3
+
+- Implemented `json5.format.trailingCommas` setting
+- Implemented `json5.format.keyQuotes` and `json5.format.stringQuotes` settings
+- Published to <https://open-vsx.org> [#2](https://github.com/BlueGlassBlock/better-json5/issues/2)
+
+## 0.0.2
+
+- Fixed [#1](https://github.com/BlueGlassBlock/better-json5/issues/1): Extension failed to load in <https://vscode.dev>
+
+## 0.0.1
 
 - Initial release

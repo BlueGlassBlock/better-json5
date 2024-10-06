@@ -1,8 +1,8 @@
 {
   "name": "better-json5",
   "displayName": "Better JSON5",
-  "description": "JSON5 language support with proper completion and JSON schema validation ⚡",
-  "version": "0.0.3",
+  "description": "JSON5 support for Visual Studio Code, done right ⚡",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -28,7 +28,9 @@
     "onLanguage:json5"
   ],
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Formatters",
+    "Linters"
   ],
   "contributes": {
     "languages": [
@@ -206,8 +208,8 @@
     ]
   },
   "dependencies": {
-    "@blueglassblock/json5-kit": "^0.2.0",
-    "@blueglassblock/json5-languageservice": "^0.2.0",
+    "@blueglassblock/json5-kit": "^0.2.1",
+    "@blueglassblock/json5-languageservice": "^0.3.0",
     "@vscode/l10n": "^0.0.18",
     "request-light": "^0.8.0",
     "vscode-languageclient": "10.0.0-next.8",

@@ -232,9 +232,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	let formatterRegistrations: Thenable<Disposable>[] | null = null;
 	let validateEnabled = true;
 	let keepLinesEnabled = false;
-	let trailingCommasOption: undefined | 'keep' | 'none' | 'all' = undefined;
-	let keyQuotesOption: undefined | 'keep' | 'single' | 'double' | 'none-single' | 'none-double' = undefined;
-	let stringQuotesOption: undefined | 'keep' | 'single' | 'double' = undefined;
+	let trailingCommasOption: undefined | 'none' | 'all' = undefined;
+	let keyQuotesOption: undefined | 'single' | 'double' | 'none-single' | 'none-double' = undefined;
+	let stringQuotesOption: undefined | 'single' | 'double' = undefined;
 
 	// The settings have changed. Is sent on server activation as well.
 	connection.onDidChangeConfiguration((change) => {
@@ -243,9 +243,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		jsonConfigurationSettings = settings.json?.schemas;
 		validateEnabled = !!settings.json?.validate?.enable;
 		keepLinesEnabled = settings.json?.keepLines?.enable || false;
-		trailingCommasOption = settings.json?.format?.trailingCommas;
-		keyQuotesOption = settings.json?.format?.keyQuotes;
-		stringQuotesOption = settings.json?.format?.stringQuotes;
+		trailingCommasOption = settings.json?.format?.trailingCommas === 'keep' ? undefined : settings.json?.format?.trailingCommas;
+		keyQuotesOption = settings.json?.format?.keyQuotes === 'keep' ? undefined : settings.json?.format?.keyQuotes;
+		stringQuotesOption = settings.json?.format?.stringQuotes === 'keep' ? undefined : settings.json?.format?.stringQuotes;
 		updateConfiguration();
 
 		const sanitizeLimitSetting = (settingValue: any) => Math.trunc(Math.max(settingValue, 0));
@@ -327,8 +327,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	function updateConfiguration() {
 		const languageSettings = {
 			validate: validateEnabled,
-			allowComments: true,
-			schemas: new Array<SchemaConfiguration>()
+			schemas: new Array<SchemaConfiguration>(),
+			keyQuotes: keyQuotesOption,
+			stringQuotes: stringQuotesOption,
 		};
 		if (schemaAssociations) {
 			if (Array.isArray(schemaAssociations)) {
@@ -449,9 +450,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	function onFormat(textDocument: TextDocumentIdentifier, range: Range | undefined, options: FormattingOptions): TextEdit[] {
 
 		options.keepLines = keepLinesEnabled;
-		options.trailingCommas = trailingCommasOption !== 'keep' ? trailingCommasOption : undefined;
-		options.keyQuotes = keyQuotesOption !== 'keep' ? keyQuotesOption : undefined;
-		options.stringQuotes = stringQuotesOption !== 'keep' ? stringQuotesOption : undefined;
+		options.trailingCommas = trailingCommasOption;
+		options.keyQuotes = keyQuotesOption;
+		options.stringQuotes = stringQuotesOption;
 		const document = documents.get(textDocument.uri);
 		if (document) {
 			const edits = languageService.format(document, range ?? getFullRange(document), options);
