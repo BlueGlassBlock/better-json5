@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.0.1
+
+- Fixed [#3](https://github.com/BlueGlassBlock/better-json5/issues/3): Extension looksup schema configuration in wrong section
+
 ## 1.0.0
 
 - Make suggestions respect quote settings

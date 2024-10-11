@@ -77,7 +77,7 @@ namespace SchemaAssociationNotification {
 }
 
 type Settings = {
-	json?: {
+	json5?: {
 		schemas?: JSONSchemaSettings[];
 		format?: {
 			enable?: boolean,
@@ -168,7 +168,7 @@ export async function startClient(context: ExtensionContext, newLanguageClient: 
 		}
 		restartTrigger = runtime.timer.setTimeout(async () => {
 			if (client) {
-				runtime.logOutputChannel.info('Extensions have changed, restarting JSON server...');
+				runtime.logOutputChannel.info('Extensions have changed, restarting JSON5 server...');
 				runtime.logOutputChannel.info('');
 				const oldClient = client;
 				client = undefined;
@@ -195,7 +195,7 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 	const documentSelector = languageParticipants.documentSelector;
 
 	const schemaResolutionErrorStatusBarItem = window.createStatusBarItem('status.json5.resolveError', StatusBarAlignment.Right, 0);
-	schemaResolutionErrorStatusBarItem.name = l10n.t('JSON: Schema Resolution Error');
+	schemaResolutionErrorStatusBarItem.name = l10n.t('JSON5: Schema Resolution Error');
 	schemaResolutionErrorStatusBarItem.text = '$(alert)';
 	toDispose.push(schemaResolutionErrorStatusBarItem);
 
@@ -212,7 +212,7 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 			const cachedSchemas = await runtime.schemaRequests.clearCache();
 			await client.sendNotification(SchemaContentChangeNotification.type, cachedSchemas);
 		}
-		window.showInformationMessage(l10n.t('JSON schema cache cleared.'));
+		window.showInformationMessage(l10n.t('JSON5 schema cache cleared.'));
 	}));
 
 
@@ -252,7 +252,7 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 
 	// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
-		// Register the server for json documents
+		// Register the server for json5 documents
 		documentSelector,
 		initializationOptions: {
 			handledSchemaProtocols: ['file'], // language server only loads file-URI. Fetching schemas with other protocols ('http'...) are made on the client.
@@ -260,8 +260,8 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 			customCapabilities: { rangeFormatting: { editLimit: 10000 } }
 		},
 		synchronize: {
-			// Synchronize the setting section 'json' to the server
-			configurationSection: ['json', 'http'],
+			// Synchronize the setting section 'json5' to the server
+			configurationSection: ['json5', 'http'],
 			fileEvents: workspace.createFileSystemWatcher('**/*.json')
 		},
 		middleware: {
@@ -359,7 +359,7 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 
 	clientOptions.outputChannel = runtime.logOutputChannel;
 	// Create the language client and start the client.
-	const client = newLanguageClient('json', languageServerDescription, clientOptions);
+	const client = newLanguageClient('json5', languageServerDescription, clientOptions);
 	client.registerProposedFeatures();
 
 	const schemaDocuments: { [uri: string]: boolean } = {};
@@ -653,7 +653,7 @@ function getSettings(): Settings {
 			proxy: httpSettings.get('proxy'),
 			proxyStrictSSL: httpSettings.get('proxyStrictSSL')
 		},
-		json: {
+		json5: {
 			validate: { enable: configuration.get(SettingIds.enableValidation) },
 			format: { enable: configuration.get(SettingIds.enableFormatter), trailingCommas: configuration.get(SettingIds.trailingCommas), keyQuotes: configuration.get(SettingIds.keyQuotes), stringQuotes: configuration.get(SettingIds.stringQuotes), },
 			keepLines: { enable: configuration.get(SettingIds.enableKeepLines) },
@@ -683,7 +683,7 @@ function getSettings(): Settings {
 
 	const folders = workspace.workspaceFolders ?? [];
 
-	const schemaConfigInfo = workspace.getConfiguration('json', null).inspect<JSONSchemaSettings[]>('schemas');
+	const schemaConfigInfo = workspace.getConfiguration('json5', null).inspect<JSONSchemaSettings[]>('schemas');
 	if (schemaConfigInfo) {
 		// settings in user config
 		collectSchemaSettings(schemaConfigInfo.globalValue, undefined, undefined);
@@ -695,7 +695,7 @@ function getSettings(): Settings {
 			}
 			for (const folder of folders) {
 				const folderUri = folder.uri;
-				const folderSchemaConfigInfo = workspace.getConfiguration('json', folderUri).inspect<JSONSchemaSettings[]>('schemas');
+				const folderSchemaConfigInfo = workspace.getConfiguration('json5', folderUri).inspect<JSONSchemaSettings[]>('schemas');
 				collectSchemaSettings(folderSchemaConfigInfo?.workspaceFolderValue, folderUri.toString(false), folderUri);
 			}
 		} else {

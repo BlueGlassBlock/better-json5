@@ -198,7 +198,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 
 	// The settings interface describes the server relevant settings part
 	interface Settings {
-		json?: {
+		json5?: {
 			schemas?: JSONSchemaSettings[];
 			format?: {
 				enable?: boolean,
@@ -240,22 +240,22 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	connection.onDidChangeConfiguration((change) => {
 		const settings = <Settings>change.settings;
 		runtime.configureHttpRequests?.(settings?.http?.proxy, !!settings.http?.proxyStrictSSL);
-		jsonConfigurationSettings = settings.json?.schemas;
-		validateEnabled = !!settings.json?.validate?.enable;
-		keepLinesEnabled = settings.json?.keepLines?.enable || false;
-		trailingCommasOption = settings.json?.format?.trailingCommas === 'keep' ? undefined : settings.json?.format?.trailingCommas;
-		keyQuotesOption = settings.json?.format?.keyQuotes === 'keep' ? undefined : settings.json?.format?.keyQuotes;
-		stringQuotesOption = settings.json?.format?.stringQuotes === 'keep' ? undefined : settings.json?.format?.stringQuotes;
+		jsonConfigurationSettings = settings.json5?.schemas;
+		validateEnabled = !!settings.json5?.validate?.enable;
+		keepLinesEnabled = settings.json5?.keepLines?.enable || false;
+		trailingCommasOption = settings.json5?.format?.trailingCommas === 'keep' ? undefined : settings.json5?.format?.trailingCommas;
+		keyQuotesOption = settings.json5?.format?.keyQuotes === 'keep' ? undefined : settings.json5?.format?.keyQuotes;
+		stringQuotesOption = settings.json5?.format?.stringQuotes === 'keep' ? undefined : settings.json5?.format?.stringQuotes;
 		updateConfiguration();
 
 		const sanitizeLimitSetting = (settingValue: any) => Math.trunc(Math.max(settingValue, 0));
-		resultLimit = sanitizeLimitSetting(settings.json?.resultLimit || Number.MAX_VALUE);
-		foldingRangeLimit = sanitizeLimitSetting(settings.json?.foldingLimit || foldingRangeLimitDefault);
-		colorDecoratorLimit = sanitizeLimitSetting(settings.json?.colorDecoratorLimit || Number.MAX_VALUE);
+		resultLimit = sanitizeLimitSetting(settings.json5?.resultLimit || Number.MAX_VALUE);
+		foldingRangeLimit = sanitizeLimitSetting(settings.json5?.foldingLimit || foldingRangeLimitDefault);
+		colorDecoratorLimit = sanitizeLimitSetting(settings.json5?.colorDecoratorLimit || Number.MAX_VALUE);
 
 		// dynamically enable & disable the formatter
 		if (dynamicFormatterRegistration) {
-			const enableFormatter = settings.json?.format?.enable;
+			const enableFormatter = settings.json5?.format?.enable;
 			if (enableFormatter) {
 				if (!formatterRegistrations) {
 					const documentSelector = [{ language: 'json5' }];
@@ -436,10 +436,10 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		return runSafeAsync(runtime, async () => {
 			const document = documents.get(codeActionParams.textDocument.uri);
 			if (document) {
-				const sortCodeAction = CodeAction.create('Sort JSON', CodeActionKind.Source.concat('.sort', '.json'));
+				const sortCodeAction = CodeAction.create('Sort JSON5', CodeActionKind.Source.concat('.sort', '.json5'));
 				sortCodeAction.command = {
 					command: 'json5.sort',
-					title: l10n.t('Sort JSON')
+					title: l10n.t('Sort JSON5')
 				};
 				return [sortCodeAction];
 			}

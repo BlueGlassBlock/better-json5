@@ -62,7 +62,7 @@ function getSettingsSchemaAssociations(uri: string) {
 	const resourceUri = Uri.parse(uri);
 	const workspaceFolder = workspace.getWorkspaceFolder(resourceUri);
 
-	const settings = workspace.getConfiguration('json', resourceUri).inspect<JSONSchemaSettings[]>('schemas');
+	const settings = workspace.getConfiguration('json5', resourceUri).inspect<JSONSchemaSettings[]>('schemas');
 
 	const associations: { fullUri: string; workspaceFolder: WorkspaceFolder | undefined; label: string }[] = [];
 
@@ -166,7 +166,7 @@ function showSchemaList(input: ShowSchemasInput) {
 
 export function createLanguageStatusItem(documentSelector: DocumentSelector, statusRequest: (uri: string) => Promise<JSONLanguageStatus>): Disposable {
 	const statusItem = languages.createLanguageStatusItem('json5.projectStatus', documentSelector);
-	statusItem.name = l10n.t('JSON Validation Status');
+	statusItem.name = l10n.t('JSON5 Validation Status');
 	statusItem.severity = LanguageStatusSeverity.Information;
 
 	const showSchemasCommand = commands.registerCommand('_json5.showAssociatedSchemaList', showSchemaList);
@@ -180,7 +180,7 @@ export function createLanguageStatusItem(documentSelector: DocumentSelector, sta
 		if (document) {
 			try {
 				statusItem.text = '$(loading~spin)';
-				statusItem.detail = l10n.t('Loading JSON info');
+				statusItem.detail = l10n.t('Loading JSON5 info');
 				statusItem.command = undefined;
 
 				const schemas = (await statusRequest(document.uri.toString())).schemas;

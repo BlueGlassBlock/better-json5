@@ -2,7 +2,7 @@
   "name": "better-json5",
   "displayName": "Better JSON5",
   "description": "JSON5 support for Visual Studio Code, done right ⚡",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -89,7 +89,8 @@
               },
               "schema": {
                 "$ref": "http://json-schema.org/draft-07/schema#",
-                "description": "%json5.schemas.schema.desc%"
+                "description": "%json5.schemas.schema.desc%",
+                "default": {}
               }
             }
           }
