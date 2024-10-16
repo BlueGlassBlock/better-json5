@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 export type JSONLanguageStatus = { schemas: string[] };
-
+import * as path from 'node:path';
 import {
 	workspace, window, languages, commands, LogOutputChannel, ExtensionContext, extensions, Uri, ColorInformation,
 	Diagnostic, StatusBarAlignment, TextEditor, TextDocument, FormattingOptions, CancellationToken, FoldingRange,
@@ -708,6 +708,36 @@ function getSettings(): Settings {
 	return settings;
 }
 
+function resolveVariables(rawPath: string): string {
+	const workspaceFolder = workspace.workspaceFolders?.[0];
+	if (!workspaceFolder) {
+			return rawPath; // No workspace folder, return the original string
+	}
+
+	// Replace ${workspaceFolder}
+	let resolvedPath = rawPath.replace(/\${workspaceFolder}/g, workspaceFolder.uri.fsPath);
+
+	// Replace other common variables
+	const activeTextEditor = window.activeTextEditor;
+	if (activeTextEditor) {
+			const currentFile = activeTextEditor.document.uri;
+			resolvedPath = resolvedPath
+					.replace(/\${file}/g, currentFile.fsPath)
+					.replace(/\${fileBasename}/g, path.basename(currentFile.fsPath))
+					.replace(/\${fileBasenameNoExtension}/g, path.basename(currentFile.fsPath, path.extname(currentFile.fsPath)))
+					.replace(/\${fileDirname}/g, path.dirname(currentFile.fsPath))
+					.replace(/\${fileExtname}/g, path.extname(currentFile.fsPath))
+					.replace(/\${relativeFile}/g, workspace.asRelativePath(currentFile));
+	}
+
+	// Replace ${env:...} variables
+	resolvedPath = resolvedPath.replace(/\${env:([^}]+)}/g, (match, envName) => {
+			return process.env[envName] || match;
+	});
+
+	return resolvedPath;
+}
+
 function getSchemaId(schema: JSONSchemaSettings, settingsLocation?: Uri): string | undefined {
 	let url = schema.url;
 	if (!url) {
@@ -716,6 +746,7 @@ function getSchemaId(schema: JSONSchemaSettings, settingsLocation?: Uri): string
 		}
 	} else if (settingsLocation && (url[0] === '.' || url[0] === '/')) {
 		url = Uri.joinPath(settingsLocation, url).toString(false);
+		url = resolveVariables(url)
 	}
 	return url;
 }
