@@ -726,8 +726,7 @@ function resolveVariables(rawPath: string): string {
 					.replace(/\${fileBasename}/g, path.basename(currentFile.fsPath))
 					.replace(/\${fileBasenameNoExtension}/g, path.basename(currentFile.fsPath, path.extname(currentFile.fsPath)))
 					.replace(/\${fileDirname}/g, path.dirname(currentFile.fsPath))
-					.replace(/\${fileExtname}/g, path.extname(currentFile.fsPath))
-					.replace(/\${relativeFile}/g, workspace.asRelativePath(currentFile));
+					.replace(/\${fileExtname}/g, path.extname(currentFile.fsPath));
 	}
 
 	// Replace ${env:...} variables
