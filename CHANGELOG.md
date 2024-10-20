@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.0
+
+- Fixed [#6](https://github.com/BlueGlassBlock/better-json5/issues/6): Multiline strings are getting false-positive errors
+- Fixed TextMate grammar for floating point numbers like `3.`
+- Implemented multiline string folding
+
 ## 1.0.1
 
 - Fixed [#3](https://github.com/BlueGlassBlock/better-json5/issues/3): Extension looksup schema configuration in wrong section

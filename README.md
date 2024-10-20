@@ -20,6 +20,10 @@
 
 ![Sorting](./assets/sorting.gif)
 
+#### Proper folding for objects, arrays and multiline strings
+
+![Folding](./assets/folding.gif)
+
 </div>
 
 ## Extension Settings
