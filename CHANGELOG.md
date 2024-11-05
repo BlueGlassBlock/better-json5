@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.1.2
+
+- Optimized packaging method
+
+## 1.1.1
+
+- Fixed [#7](https://github.com/BlueGlassBlock/better-json5/issues/7)
+- Fixed [#8](https://github.com/BlueGlassBlock/better-json5/issues/8)
+
 ## 1.1.0
 
 - Fixed [#6](https://github.com/BlueGlassBlock/better-json5/issues/6): Multiline strings are getting false-positive errors

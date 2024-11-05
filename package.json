@@ -2,7 +2,7 @@
   "name": "better-json5",
   "displayName": "Better JSON5",
   "description": "JSON5 support for Visual Studio Code, done right ⚡",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -15,7 +15,8 @@
   "scripts": {
     "compile-dbg": "webpack --mode development",
     "compile": "webpack --mode production",
-    "package": "npm run compile && vsce package --no-yarn"
+    "package": "npm run compile && vsce package --no-dependencies",
+    "release": "npm run package && vsce publish --no-dependencies && ovsx publish --no-dependencies"
   },
   "icon": "./icon.png",
   "capabilities": {
@@ -209,7 +210,7 @@
     ]
   },
   "dependencies": {
-    "@blueglassblock/json5-kit": "^0.2.2",
+    "@blueglassblock/json5-kit": "0.2.3",
     "@blueglassblock/json5-languageservice": "^0.4.0",
     "@vscode/l10n": "^0.0.18",
     "request-light": "^0.8.0",
@@ -221,7 +222,7 @@
     "@types/node": "20.x",
     "@types/vscode": "^1.93.0",
     "@vscode/test-web": "^0.0.60",
-    "@vscode/vsce": "^3.1.1",
+    "@vscode/vsce": "^3.2.1",
     "assert": "^2.1.0",
     "ovsx": "^0.9.5",
     "process": "^0.11.10",

@@ -142,23 +142,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueglassblock/json5-kit@npm:^0.2.2":
-  version: 0.2.2
-  resolution: "@blueglassblock/json5-kit@npm:0.2.2"
-  checksum: 10c0/bba0a6635a87bec8cebc6c4c03ac01e73f7d5058e220e2d0499c5da30853b1727500bc4fd6186a44e68d80cdc8655aa49d7d657c99fe72c8f840125c9be28e2d
+"@blueglassblock/json5-kit@npm:0.2.3, @blueglassblock/json5-kit@npm:^0.2.2":
+  version: 0.2.3
+  resolution: "@blueglassblock/json5-kit@npm:0.2.3"
+  checksum: 10c0/2df2137e629cedff55ac8a5e1b61f9ddca9e57bec7548665d2effed01031fe60a7de36561e97b2e1e65dfeb61e4e3f1c9b51de82a8d9bff82203cb2169dce0e8
   languageName: node
   linkType: hard
 
-"@blueglassblock/json5-languageservice@file:../json5-languageservice::locator=better-json5%40workspace%3A.":
+"@blueglassblock/json5-languageservice@npm:^0.4.0":
   version: 0.4.0
-  resolution: "@blueglassblock/json5-languageservice@file:../json5-languageservice#../json5-languageservice::hash=3a6a57&locator=better-json5%40workspace%3A."
+  resolution: "@blueglassblock/json5-languageservice@npm:0.4.0"
   dependencies:
     "@blueglassblock/json5-kit": "npm:^0.2.2"
     "@vscode/l10n": "npm:^0.0.18"
     vscode-languageserver-textdocument: "npm:^1.0.12"
     vscode-languageserver-types: "npm:^3.17.5"
     vscode-uri: "npm:^3.0.8"
-  checksum: 10c0/86c3c44d814617fc98a0c02bc5df2a2931141a28360deb04606cd3c8b9ed6b86ceff683f47a37db48d8104b26522fd4d8998159004fdbb37261b5e7343fed400
+  checksum: 10c0/0a69ab1f46f22b365d642b784583e8ceadc87f4fc7ae5488fce67d039fb4d0aa73c8d4f6f794f1777b360d27039107ef6bc0b4212222c6c6590a68105e9f2b33
   languageName: node
   linkType: hard
 
@@ -463,7 +463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vscode/vsce@npm:^3.1.0, @vscode/vsce@npm:^3.1.1":
+"@vscode/vsce@npm:^3.1.0":
   version: 3.1.1
   resolution: "@vscode/vsce@npm:3.1.1"
   dependencies:
@@ -498,6 +498,44 @@ __metadata:
   bin:
     vsce: vsce
   checksum: 10c0/f583457bf1f7e51f0d79c45895e47f559dab1fcdc192e7053df96e6891743112ed4d0fa29830774ba04fabe55da7f262c1805fe35ceca93b04b965b2935c8e3e
+  languageName: node
+  linkType: hard
+
+"@vscode/vsce@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "@vscode/vsce@npm:3.2.1"
+  dependencies:
+    "@azure/identity": "npm:^4.1.0"
+    "@vscode/vsce-sign": "npm:^2.0.0"
+    azure-devops-node-api: "npm:^12.5.0"
+    chalk: "npm:^2.4.2"
+    cheerio: "npm:^1.0.0-rc.9"
+    cockatiel: "npm:^3.1.2"
+    commander: "npm:^6.2.1"
+    form-data: "npm:^4.0.0"
+    glob: "npm:^11.0.0"
+    hosted-git-info: "npm:^4.0.2"
+    jsonc-parser: "npm:^3.2.0"
+    keytar: "npm:^7.7.0"
+    leven: "npm:^3.1.0"
+    markdown-it: "npm:^14.1.0"
+    mime: "npm:^1.3.4"
+    minimatch: "npm:^3.0.3"
+    parse-semver: "npm:^1.1.1"
+    read: "npm:^1.0.7"
+    semver: "npm:^7.5.2"
+    tmp: "npm:^0.2.3"
+    typed-rest-client: "npm:^1.8.4"
+    url-join: "npm:^4.0.1"
+    xml2js: "npm:^0.5.0"
+    yauzl: "npm:^2.3.1"
+    yazl: "npm:^2.2.2"
+  dependenciesMeta:
+    keytar:
+      optional: true
+  bin:
+    vsce: vsce
+  checksum: 10c0/9065bd67e8eabe9a7a907cf3d16476172e34dd9f42f1ffddaae47e032b442c520ae918bcaab77491a0ff4becc752a432bff1c2bea4a3ff5fbd1eb4496a700a15
   languageName: node
   linkType: hard
 
@@ -937,13 +975,13 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "better-json5@workspace:."
   dependencies:
-    "@blueglassblock/json5-kit": "npm:^0.2.2"
-    "@blueglassblock/json5-languageservice": "npm:^0.3.0"
+    "@blueglassblock/json5-kit": "npm:0.2.3"
+    "@blueglassblock/json5-languageservice": "npm:^0.4.0"
     "@types/node": "npm:20.x"
     "@types/vscode": "npm:^1.93.0"
     "@vscode/l10n": "npm:^0.0.18"
     "@vscode/test-web": "npm:^0.0.60"
-    "@vscode/vsce": "npm:^3.1.1"
+    "@vscode/vsce": "npm:^3.2.1"
     assert: "npm:^2.1.0"
     ovsx: "npm:^0.9.5"
     process: "npm:^0.11.10"
