@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.2.0
+
+- Removed telemetry code that came with the fork.
+
+- Addressed [vscode#232647](https://github.com/microsoft/vscode/issues/232647).
+
+- Supported `${workspaceFolder}`, `${workspaceFolderBasename}`, `${pathSeparator}`, `${env:VARIABLE_NAME}` and `${config:CONFIG_NAME}` in `fileMatch` and `url` properties of `json5.schema` settings. ([#4](https://github.com/BlueGlassBlock/better-json5/issues/4))
+
+> Please note that using variable substitution in `fileMatch` may not work as you expected since the pattern is identified as a **glob pattern**, and it doesn't like path separators that may come with variables.
+
 ## 1.1.2
 
 - Optimized packaging method

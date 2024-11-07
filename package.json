@@ -2,7 +2,7 @@
   "name": "better-json5",
   "displayName": "Better JSON5",
   "description": "JSON5 support for Visual Studio Code, done right ⚡",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "engines": {
     "vscode": "^1.93.0"
   },

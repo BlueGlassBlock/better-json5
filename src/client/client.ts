@@ -17,7 +17,6 @@ import {
 	DocumentRangeFormattingRequest, ProvideCompletionItemsSignature, ProvideHoverSignature, BaseLanguageClient, ProvideFoldingRangeSignature, ProvideDocumentSymbolsSignature, ProvideDocumentColorsSignature
 } from 'vscode-languageclient';
 
-
 import { hash } from './utils/hash';
 import { createDocumentSymbolsLimitItem, createLanguageStatusItem, createLimitStatusItem } from './languageStatus';
 import { getLanguageParticipants, LanguageParticipants } from './languageParticipants';
@@ -133,7 +132,6 @@ export type LanguageClientConstructor = (name: string, description: string, clie
 
 export interface Runtime {
 	schemaRequests: SchemaRequestService;
-	telemetry?: TelemetryReporter;
 	readonly timer: {
 		setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): Disposable;
 	};
@@ -208,11 +206,15 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 	toDispose.push(documentSymbolsLimitStatusbarItem);
 
 	toDispose.push(commands.registerCommand('json5.clearCache', async () => {
+		client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings() }); // Push latest settings just in case
 		if (isClientReady && runtime.schemaRequests.clearCache) {
 			const cachedSchemas = await runtime.schemaRequests.clearCache();
 			await client.sendNotification(SchemaContentChangeNotification.type, cachedSchemas);
+			window.showInformationMessage(l10n.t('JSON5 schema cache fully cleared.'));
 		}
-		window.showInformationMessage(l10n.t('JSON5 schema cache cleared.'));
+		else {
+			window.showErrorMessage(l10n.t('Unable to purge cache, triggered settings update instead.'));
+		}
 	}));
 
 
@@ -389,16 +391,6 @@ async function startClientWithParticipants(context: ExtensionContext, languagePa
 				throw new ResponseError(2, e.toString(), e);
 			}
 		} else if (schemaDownloadEnabled) {
-			if (runtime.telemetry && uri.authority === 'schema.management.azure.com') {
-				/* __GDPR__
-					"json5.schema" : {
-						"owner": "aeschli",
-						"comment": "Measure the use of the Azure resource manager schemas",
-						"schemaURL" : { "classification": "SystemMetaData", "purpose": "FeatureInsight", "comment": "The azure schema URL that was requested." }
-					}
-				*/
-				runtime.telemetry.sendTelemetryEvent('json5.schema', { schemaURL: uriString });
-			}
 			try {
 				return await runtime.schemaRequests.getContent(uriString);
 			} catch (e) {
@@ -670,11 +662,40 @@ function getSettings(): Settings {
 	 * settingsLocation against which path relative schema URLs are resolved
 	 */
 	const collectSchemaSettings = (schemaSettings: JSONSchemaSettings[] | undefined, folderUri: string | undefined, settingsLocation: Uri | undefined) => {
+		function substituteVariables(path: string): string {
+			return path.replace(/\$\{(.*?)\}/g, (match, variable: string) => {
+				if (variable.startsWith('env:')) {
+					return process.env[variable.substring('env:'.length)] || '';
+				}
+				if (variable.startsWith('config:')) {
+					const res = workspace.getConfiguration().get<any>(variable.substring('config:'.length));
+					return typeof res === 'string' ? res : '';
+				}
+				folderUri = folderUri || workspace.workspaceFolders?.[0]?.uri.toString();
+				switch (variable) {
+					case 'workspaceFolder':
+						return settingsLocation ? settingsLocation.fsPath : '';
+					case 'workspaceFolderBasename':
+						return settingsLocation?.path.split('/').pop() || '';
+					case 'pathSeparator':
+						return process.platform === 'win32' ? '\\' : '/';
+				}
+				return match;
+			});
+		}
+
+		function urlify(path: string): string {
+			if (!path.match(/^(\w+:\/\/|\/|!)/)) {
+				return Uri.file(path).toString();
+			}
+			return path;
+		}
+
 		if (schemaSettings) {
 			for (const setting of schemaSettings) {
 				const url = getSchemaId(setting, settingsLocation);
 				if (url) {
-					const schemaSetting: JSONSchemaSettings = { url, fileMatch: setting.fileMatch, folderUri, schema: setting.schema };
+					const schemaSetting: JSONSchemaSettings = { url: urlify(substituteVariables(url)), fileMatch: setting.fileMatch?.map(substituteVariables), folderUri, schema: setting.schema };
 					schemas.push(schemaSetting);
 				}
 			}
