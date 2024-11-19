@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.2.1
+
+- Fixed a minor issue that caused keys with only one character to be flagged as false-positive.
+
 ## 1.2.0
 
 - Removed telemetry code that came with the fork.
