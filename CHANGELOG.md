@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.3.0
+
+- Suggestions now respect quote of current input, instead of forcing users to use `json5.format.keyQuotes` and `json5.format.stringQuotes` settings all the time. ([#9](https://github.com/BlueGlassBlock/better-json5/issues/9))
+
 ## 1.2.1
 
 - Fixed a minor issue that caused keys with only one character to be flagged as false-positive.
