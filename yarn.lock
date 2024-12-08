@@ -156,16 +156,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blueglassblock/json5-languageservice@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@blueglassblock/json5-languageservice@npm:0.5.0"
+"@blueglassblock/json5-languageservice@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@blueglassblock/json5-languageservice@npm:0.5.1"
   dependencies:
     "@blueglassblock/json5-kit": "npm:^0.2.4"
     "@vscode/l10n": "npm:^0.0.18"
     vscode-languageserver-textdocument: "npm:^1.0.12"
     vscode-languageserver-types: "npm:^3.17.5"
     vscode-uri: "npm:^3.0.8"
-  checksum: 10c0/d58a844272cdb72650f1b4eac507091a2532c0d0fbee23f3c3d1c8e41f191fc98bc16ec7eee98d0a5f6c569437e5e75d14036fdf1c43b31ece8265c790a0ffb4
+  checksum: 10c0/39c5cd193f0e908775ac21410be5a881263c29860243ca6b4de930240ab8950196163c181c166912f9900007b2fa94d1fa488913300de50cc1a38d8daaf714e7
   languageName: node
   linkType: hard
 
@@ -983,7 +983,7 @@ __metadata:
   resolution: "better-json5@workspace:."
   dependencies:
     "@blueglassblock/json5-kit": "npm:0.2.3"
-    "@blueglassblock/json5-languageservice": "npm:^0.5.0"
+    "@blueglassblock/json5-languageservice": "npm:^0.5.1"
     "@types/node": "npm:20.x"
     "@types/vscode": "npm:^1.93.0"
     "@vscode/l10n": "npm:^0.0.18"
@@ -995,8 +995,8 @@ __metadata:
     request-light: "npm:^0.8.0"
     ts-loader: "npm:^9.5.1"
     typescript: "npm:^5.6.2"
-    vscode-languageclient: "npm:10.0.0-next.8"
-    vscode-languageserver: "npm:10.0.0-next.6"
+    vscode-languageclient: "npm:^10.0.0-next.13"
+    vscode-languageserver: "npm:^10.0.0-next.11"
     vscode-uri: "npm:^3.0.8"
     webpack: "npm:^5.95.0"
     webpack-cli: "npm:^5.1.4"
@@ -4419,31 +4419,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vscode-jsonrpc@npm:9.0.0-next.4":
-  version: 9.0.0-next.4
-  resolution: "vscode-jsonrpc@npm:9.0.0-next.4"
-  checksum: 10c0/07bee1c78a5bbac49efe00765a0b6941bc7fd29b7895cf2abaaeb346625c8cb562bbcd02a391b8cabae7bb45a49baeafe2805d32cfbaf50f38537b3328cb04cd
+"vscode-jsonrpc@npm:9.0.0-next.6":
+  version: 9.0.0-next.6
+  resolution: "vscode-jsonrpc@npm:9.0.0-next.6"
+  checksum: 10c0/4b8c242171fb1006338584494bd99f5a33d6f72ef0832e45d2e585dcb7d4a3b982efd77beb421e3195d331b89e96419dc54ebb7bf903d002ef389e443fcc78f0
   languageName: node
   linkType: hard
 
-"vscode-languageclient@npm:10.0.0-next.8":
-  version: 10.0.0-next.8
-  resolution: "vscode-languageclient@npm:10.0.0-next.8"
+"vscode-languageclient@npm:^10.0.0-next.13":
+  version: 10.0.0-next.13
+  resolution: "vscode-languageclient@npm:10.0.0-next.13"
   dependencies:
     minimatch: "npm:^9.0.3"
     semver: "npm:^7.6.0"
-    vscode-languageserver-protocol: "npm:3.17.6-next.6"
-  checksum: 10c0/ab5da8d31700f54948e23b4aaea674353439446c4c6845e11478f5dbec713f06159bf9cf1ab7cbb1447d26914526e661c2e57bf4b7c820ae9c20d966908f06d0
+    vscode-languageserver-protocol: "npm:3.17.6-next.11"
+  checksum: 10c0/cd1bf968677e05131bae3fbaafd40dcb34d641fdd731ee5d0559b4d907468ed66b26c88dcfafef9679e6cb5880061b5981f456dfd54eea6d490c709624334fea
   languageName: node
   linkType: hard
 
-"vscode-languageserver-protocol@npm:3.17.6-next.6":
-  version: 3.17.6-next.6
-  resolution: "vscode-languageserver-protocol@npm:3.17.6-next.6"
+"vscode-languageserver-protocol@npm:3.17.6-next.11":
+  version: 3.17.6-next.11
+  resolution: "vscode-languageserver-protocol@npm:3.17.6-next.11"
   dependencies:
-    vscode-jsonrpc: "npm:9.0.0-next.4"
-    vscode-languageserver-types: "npm:3.17.6-next.4"
-  checksum: 10c0/788bc9bff8b07c01a4533118aba93c55f7e2aec2332b88d6983f2b77c35e59bfe1e34182d367a6a153f18a046ec538a19233ca911372209aa79081d742d9fa7d
+    vscode-jsonrpc: "npm:9.0.0-next.6"
+    vscode-languageserver-types: "npm:3.17.6-next.5"
+  checksum: 10c0/681ea23b099183e4ba19ad4ed9ca3b964728d375be378909775335d2140119249934e1206ea6b1bbbe515f02f21b65ba9ab9516f530cbd30f6c85b248f83dd31
   languageName: node
   linkType: hard
 
@@ -4454,10 +4454,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vscode-languageserver-types@npm:3.17.6-next.4":
-  version: 3.17.6-next.4
-  resolution: "vscode-languageserver-types@npm:3.17.6-next.4"
-  checksum: 10c0/f9a150b5324f0fbfa0959d387d46d0e8cb23681353f4d7430b2e51cbf8aa28a47f684f82458a5136ca8d0a79a8a1fa49d76c3a2b3930f5ad3025068919543ea6
+"vscode-languageserver-types@npm:3.17.6-next.5":
+  version: 3.17.6-next.5
+  resolution: "vscode-languageserver-types@npm:3.17.6-next.5"
+  checksum: 10c0/402eb153972ac49c2d7b85b507d57220bfe169030adc7f3be6e18885eece8edf68aad72ac38f599a87fa32cc852ca406989c00a9454be26e6d712513e5bcec54
   languageName: node
   linkType: hard
 
@@ -4468,14 +4468,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vscode-languageserver@npm:10.0.0-next.6":
-  version: 10.0.0-next.6
-  resolution: "vscode-languageserver@npm:10.0.0-next.6"
+"vscode-languageserver@npm:^10.0.0-next.11":
+  version: 10.0.0-next.11
+  resolution: "vscode-languageserver@npm:10.0.0-next.11"
   dependencies:
-    vscode-languageserver-protocol: "npm:3.17.6-next.6"
+    vscode-languageserver-protocol: "npm:3.17.6-next.11"
   bin:
     installServerIntoExtension: bin/installServerIntoExtension
-  checksum: 10c0/961501024e74585eb2f10b957260141314954715d2ff2baaf3e95c394d1aa3664527548a83efd4b1fa823a3dc214ac727a027f27adfd12fd745386766118ffab
+  checksum: 10c0/945801f6283182c88f379c12fa38bdf82d0ce4599d187f55abe91a5f6e6d1f736ea3f6cabaefa65f7059b0fa87a2d818a122999eeb9f4a68642d72cb68de3711
   languageName: node
   linkType: hard
 

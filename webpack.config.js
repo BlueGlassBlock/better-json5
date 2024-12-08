@@ -35,6 +35,9 @@ const clientBrowserConfig = {
 			// see https://webpack.js.org/configuration/resolve/#resolvefallback
 			// for the list of Node.js core module polyfills.
 			'assert': require.resolve('assert')
+		},
+		extensionAlias: {
+			'.js': ['.js', '.ts']
 		}
 	},
 	module: {
@@ -79,7 +82,10 @@ const clientNodeConfig = {
 	resolve: {
 		conditionNames: ['import', 'require', 'node-addons', 'node'],
 		mainFields: ['module', 'main'],
-		extensions: ['.ts', '.js'] // support ts-files and js-files
+		extensions: ['.ts', '.js'], // support ts-files and js-files
+		extensionAlias: {
+			'.js': ['.js', '.ts']
+		}
 	},
 	module: {
 		rules: [{
@@ -129,8 +135,8 @@ const serverBrowserConfig = {
 	resolve: {
 		mainFields: ['browser', 'module', 'main'], // look for `browser` entry point in imported node modules
 		extensions: ['.ts', '.js'], // support ts-files and js-files
-		alias: {
-			// provides alternate implementation for node module and source files
+		extensionAlias: {
+			'.js': ['.js', '.ts']
 		},
 		fallback: {
 			// Webpack 5 no longer polyfills Node.js core modules automatically.
@@ -181,7 +187,10 @@ const serverNodeConfig = {
 	resolve: {
 		conditionNames: ['import', 'require', 'node-addons', 'node'],
 		mainFields: ['module', 'main'],
-		extensions: ['.ts', '.js'] // support ts-files and js-files
+		extensions: ['.ts', '.js'], // support ts-files and js-files
+		extensionAlias: {
+			'.js': ['.js', '.ts']
+		},
 	},
 	module: {
 		rules: [{
