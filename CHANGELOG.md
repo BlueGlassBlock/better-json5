@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.4.0
+
+- Colorization for numerics now can be selected with `numbers` in `editor.tokenColorCustomizations` settings. ([#11](https://github.com/BlueGlassBlock/better-json5/issues/11))
+- TextMate scopes for numerics are now `constant.numeric.hex.json5` and `constant.numeric.dec.json5` for hexadecimal and decimal numbers respectively.
+
+
+
 ## 1.3.0
 
 - Suggestions now respect quote of current input, instead of forcing users to use `json5.format.keyQuotes` and `json5.format.stringQuotes` settings all the time. ([#9](https://github.com/BlueGlassBlock/better-json5/issues/9))

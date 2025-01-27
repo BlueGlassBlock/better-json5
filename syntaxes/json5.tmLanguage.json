@@ -57,12 +57,12 @@
 				{
 					"comment": "handles hexadecimal numbers",
 					"match": "(0x)[0-9a-fA-f]*",
-					"name": "constant.hex.numeric.json5 constant.hex.numeric.json.five"
+					"name": "constant.numeric.hex.json5 constant.numeric.hex.json.five"
 				},
 				{
 					"comment": "handles integer and decimal numbers",
 					"match": "[+-.]?(?=[1-9]|0(?!\\d))\\d+(\\.\\d*)?([eE][+-]?\\d+)?",
-					"name": "constant.dec.numeric.json5 constant.dec.numeric.json.five"
+					"name": "constant.numeric.dec.json5 constant.numeric.dec.json.five"
 				}
 			]
 		},
