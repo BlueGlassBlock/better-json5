@@ -213,6 +213,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 				trailingCommas?: 'keep' | 'none' | 'all',
 				keyQuotes?: 'keep' | 'single' | 'double' | 'none-single' | 'none-double',
 				stringQuotes?: 'keep' | 'single' | 'double',
+				tabSize?: boolean | number,
 			};
 			keepLines?: { enable?: boolean };
 			validate?: { enable?: boolean };
@@ -243,6 +244,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	let trailingCommasOption: undefined | 'none' | 'all' = undefined;
 	let keyQuotesOption: undefined | 'single' | 'double' | 'none-single' | 'none-double' = undefined;
 	let stringQuotesOption: undefined | 'single' | 'double' = undefined;
+	let tabSizeOption: undefined | true | number = undefined;
 
 	// The settings have changed. Is sent on server activation as well.
 	connection.onDidChangeConfiguration((change) => {
@@ -254,6 +256,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		trailingCommasOption = settings.json5?.format?.trailingCommas === 'keep' ? undefined : settings.json5?.format?.trailingCommas;
 		keyQuotesOption = settings.json5?.format?.keyQuotes === 'keep' ? undefined : settings.json5?.format?.keyQuotes;
 		stringQuotesOption = settings.json5?.format?.stringQuotes === 'keep' ? undefined : settings.json5?.format?.stringQuotes;
+		tabSizeOption = settings.json5?.format?.tabSize === false ? undefined : settings.json5?.format?.tabSize;
 		updateConfiguration();
 
 		const sanitizeLimitSetting = (settingValue: any) => Math.trunc(Math.max(settingValue, 0));
@@ -471,6 +474,17 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		options.trailingCommas = trailingCommasOption;
 		options.keyQuotes = keyQuotesOption;
 		options.stringQuotes = stringQuotesOption;
+
+		if (tabSizeOption !== undefined) {
+			if (tabSizeOption === true) {
+				options.insertSpaces = false;
+				options.tabSize = 1;
+			}
+			else {
+				options.insertSpaces = true;
+				options.tabSize = typeof tabSizeOption === 'number' ? tabSizeOption : 4;
+			}
+		}
 		const document = documents.get(textDocument.uri);
 		if (document) {
 			const edits = languageService.format(document, range ?? getFullRange(document), options);

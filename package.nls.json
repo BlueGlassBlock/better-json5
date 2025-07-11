@@ -9,6 +9,7 @@
 	"json5.format.trailingCommas.desc": "Controls whether trailing commas are added when formatting.",
 	"json5.format.keyQuotes.desc": "Controls which quotes are used for object keys when formatting.",
 	"json5.format.stringQuotes.desc": "Controls which quotes are used for strings other than keys when formatting.",
+	"json5.format.tabSize.desc": "Overrides the number of spaces used for indentation when formatting. Can be a number or boolean value `true` to use tab character. When unset or set to `false`, the editor's tab size is used.",
 	"json5.validate.enable.desc": "Enable/disable JSON5 validation.",
 	"json5.tracing.desc": "Traces the communication between VS Code and the JSON5 language server.",
 	"json5.colorDecorators.enable.desc": "Enables or disables color decorators",

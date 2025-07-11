@@ -4,6 +4,8 @@
 
 > JSON5 support for Visual Studio Code, done right ⚡
 
+This extension provides semantic syntax highlighting, validation, formatting, and JSON schema based intellisense / completion for JSON5 files in Visual Studio Code.
+
 ## Features
 
 #### Syntax highlighting with correctly colored keys, with your favorite theme support out-of-the-box

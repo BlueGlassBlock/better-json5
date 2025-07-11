@@ -87,6 +87,7 @@ type Settings = {
 			trailingCommas?: 'keep' | 'none' | 'all',
 			keyQuotes?: 'keep' | 'single' | 'double' | 'none-single' | 'none-double',
 			stringQuotes?: 'keep' | 'single' | 'double',
+			tabSize?: number | boolean,
 		};
 		keepLines?: { enable?: boolean };
 		validate?: { enable?: boolean };
@@ -113,6 +114,7 @@ export namespace SettingIds {
 	export const trailingCommas = 'json5.format.trailingCommas';
 	export const keyQuotes = 'json5.format.keyQuotes';
 	export const stringQuotes = 'json5.format.stringQuotes';
+	export const tabSize = 'json5.format.tabSize';
 	export const enableValidation = 'json5.validate.enable';
 	export const enableSchemaDownload = 'json5.schemaDownload.enable';
 	export const maxItemsComputed = 'json5.maxItemsComputed';
@@ -232,6 +234,7 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 			const textEditor = window.activeTextEditor;
 			if (textEditor) {
 				const documentOptions = textEditor.options;
+
 				const textEdits = await getSortTextEdits(textEditor.document, documentOptions.tabSize, documentOptions.insertSpaces);
 				const success = await textEditor.edit(mutator => {
 					for (const edit of textEdits) {
@@ -687,7 +690,9 @@ function getSettings(): Settings {
 		},
 		json5: {
 			validate: { enable: configuration.get(SettingIds.enableValidation) },
-			format: { enable: configuration.get(SettingIds.enableFormatter), trailingCommas: configuration.get(SettingIds.trailingCommas), keyQuotes: configuration.get(SettingIds.keyQuotes), stringQuotes: configuration.get(SettingIds.stringQuotes), },
+			format: {
+				enable: configuration.get(SettingIds.enableFormatter), trailingCommas: configuration.get(SettingIds.trailingCommas), keyQuotes: configuration.get(SettingIds.keyQuotes), stringQuotes: configuration.get(SettingIds.stringQuotes), tabSize: configuration.get(SettingIds.tabSize)
+			},
 			keepLines: { enable: configuration.get(SettingIds.enableKeepLines) },
 			schemas,
 			resultLimit: resultLimit + 1, // ask for one more so we can detect if the limit has been exceeded

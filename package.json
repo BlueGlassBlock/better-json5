@@ -1,7 +1,7 @@
 {
   "name": "better-json5",
   "displayName": "Better JSON5",
-  "description": "JSON5 support for Visual Studio Code, done right ⚡",
+  "description": "JSON5 highlighter + intellisense + formatter + validator for VS Code",
   "version": "1.5.0",
   "engines": {
     "vscode": "^1.101.0"
@@ -149,6 +149,15 @@
           ],
           "default": "keep",
           "description": "%json5.format.stringQuotes.desc%"
+        },
+        "json5.format.tabSize": {
+          "type": [
+            "number",
+            "boolean"
+          ],
+          "scope": "window",
+          "default": false,
+          "description": "%json5.format.tabSize.desc%"
         },
         "json5.trace.server": {
           "type": "string",
