@@ -109,6 +109,9 @@
 							"include": "#value"
 						},
 						{
+							"include": "#comments"
+						},
+						{
 							"match": "[^\\s,]",
 							"name": "invalid.illegal.expected-dictionary-separator.json5 invalid.illegal.expected-dictionary-separator.json.five"
 						}

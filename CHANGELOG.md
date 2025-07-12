@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.5.0
+
+- Fixed syntax highlighting for comments in objects.
+- Added `json5.format.startIgnoreDirective` and `json5.format.endIgnoreDirective` settings to control the start and end of ignore directives in formatting. Currently they only work for `//` line comments.([#12](https://github.com/BlueGlassBlock/better-json5/issues/12))
+- Fixed trailing comma formatting for objects having comments as their last token.
+- Added `json5.format.tabSize` to override tab size for formatting. If set to `false`, it will use the default tab size of the editor. ([#14](https://github.com/BlueGlassBlock/better-json5/issues/14))
+- Added Chinese translation for the extension.
+- Changed default sorting order: symbols -> uncapitalized keys -> capitalized keys.
+
 ## 1.4.0
 
 - Colorization for numerics now can be selected with `numbers` in `editor.tokenColorCustomizations` settings. ([#11](https://github.com/BlueGlassBlock/better-json5/issues/11))

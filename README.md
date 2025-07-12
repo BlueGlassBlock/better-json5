@@ -4,7 +4,9 @@
 
 > JSON5 support for Visual Studio Code, done right ⚡
 
-This extension provides semantic syntax highlighting, validation, formatting, and JSON schema based intellisense / completion for JSON5 files in Visual Studio Code.
+</div>
+
+Syntax highlighting, validation, formatting, and JSON schema based intellisense / completion for JSON5 files in Visual Studio Code.
 
 ## Features
 
@@ -37,6 +39,9 @@ This extension provides semantic syntax highlighting, validation, formatting, an
 - `json5.format.trailingCommas`: Control the occurrence of trailing commas in objects and arrays.
 - `json5.format.keyQuotes`: Control the usage of quotes for object keys.
 - `json5.format.stringQuotes`: Control the usage of quotes for string values in objects and arrays.
+- `json5.format.tabSize`: Override the tab size for formatting. If set to `false`, it will use the default tab size of the editor. If set to `true`, it will use <kbd>Tab</kbd> (`\t`) for indentation. If set to a number, it will use that number of spaces for indentation.
+- `json5.format.startIgnoreDirective`: The start of ignore directive for formatting. Default to `json5-fmt: off`. Only works for `//` line comments.
+- `json5.format.endIgnoreDirective`: The end of ignore directive for formatting. Default to `json5-fmt: on`. Only works for `//` line comments.
 - `json5.tracing`: Traces the communication between VS Code and the JSON5 language server.
 
 ## Credits

@@ -214,6 +214,8 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 				keyQuotes?: 'keep' | 'single' | 'double' | 'none-single' | 'none-double',
 				stringQuotes?: 'keep' | 'single' | 'double',
 				tabSize?: boolean | number,
+				startIgnoreDirective?: string;
+				endIgnoreDirective?: string;
 			};
 			keepLines?: { enable?: boolean };
 			validate?: { enable?: boolean };
@@ -245,6 +247,8 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	let keyQuotesOption: undefined | 'single' | 'double' | 'none-single' | 'none-double' = undefined;
 	let stringQuotesOption: undefined | 'single' | 'double' = undefined;
 	let tabSizeOption: undefined | true | number = undefined;
+	let startIgnoreDirective: string | undefined = undefined;
+	let endIgnoreDirective: string | undefined = undefined;
 
 	// The settings have changed. Is sent on server activation as well.
 	connection.onDidChangeConfiguration((change) => {
@@ -257,6 +261,9 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		keyQuotesOption = settings.json5?.format?.keyQuotes === 'keep' ? undefined : settings.json5?.format?.keyQuotes;
 		stringQuotesOption = settings.json5?.format?.stringQuotes === 'keep' ? undefined : settings.json5?.format?.stringQuotes;
 		tabSizeOption = settings.json5?.format?.tabSize === false ? undefined : settings.json5?.format?.tabSize;
+		startIgnoreDirective = settings.json5?.format?.startIgnoreDirective;
+		endIgnoreDirective = settings.json5?.format?.endIgnoreDirective;
+
 		updateConfiguration();
 
 		const sanitizeLimitSetting = (settingValue: any) => Math.trunc(Math.max(settingValue, 0));
@@ -474,6 +481,8 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		options.trailingCommas = trailingCommasOption;
 		options.keyQuotes = keyQuotesOption;
 		options.stringQuotes = stringQuotesOption;
+		options.startIgnoreDirective = startIgnoreDirective;
+		options.endIgnoreDirective = endIgnoreDirective;
 
 		if (tabSizeOption !== undefined) {
 			if (tabSizeOption === true) {

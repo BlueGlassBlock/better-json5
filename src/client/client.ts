@@ -88,6 +88,8 @@ type Settings = {
 			keyQuotes?: 'keep' | 'single' | 'double' | 'none-single' | 'none-double',
 			stringQuotes?: 'keep' | 'single' | 'double',
 			tabSize?: number | boolean,
+			startIgnoreDirective?: string;
+			endIgnoreDirective?: string;
 		};
 		keepLines?: { enable?: boolean };
 		validate?: { enable?: boolean };
@@ -115,6 +117,9 @@ export namespace SettingIds {
 	export const keyQuotes = 'json5.format.keyQuotes';
 	export const stringQuotes = 'json5.format.stringQuotes';
 	export const tabSize = 'json5.format.tabSize';
+	export const startIgnoreDirective = 'json5.format.startIgnoreDirective';
+	export const endIgnoreDirective = 'json5.format.endIgnoreDirective';
+
 	export const enableValidation = 'json5.validate.enable';
 	export const enableSchemaDownload = 'json5.schemaDownload.enable';
 	export const maxItemsComputed = 'json5.maxItemsComputed';
@@ -691,7 +696,13 @@ function getSettings(): Settings {
 		json5: {
 			validate: { enable: configuration.get(SettingIds.enableValidation) },
 			format: {
-				enable: configuration.get(SettingIds.enableFormatter), trailingCommas: configuration.get(SettingIds.trailingCommas), keyQuotes: configuration.get(SettingIds.keyQuotes), stringQuotes: configuration.get(SettingIds.stringQuotes), tabSize: configuration.get(SettingIds.tabSize)
+				enable: configuration.get(SettingIds.enableFormatter),
+				trailingCommas: configuration.get(SettingIds.trailingCommas),
+				keyQuotes: configuration.get(SettingIds.keyQuotes),
+				stringQuotes: configuration.get(SettingIds.stringQuotes),
+				tabSize: configuration.get(SettingIds.tabSize),
+				startIgnoreDirective: configuration.get(SettingIds.startIgnoreDirective),
+				endIgnoreDirective: configuration.get(SettingIds.endIgnoreDirective)
 			},
 			keepLines: { enable: configuration.get(SettingIds.enableKeepLines) },
 			schemas,

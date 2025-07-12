@@ -159,6 +159,18 @@
           "default": false,
           "description": "%json5.format.tabSize.desc%"
         },
+        "json5.format.startIgnoreDirective": {
+          "type": "string",
+          "scope": "window",
+          "default": "json5-fmt: off",
+          "description": "%json5.format.startIgnoreDirective.desc%"
+        },
+        "json5.format.endIgnoreDirective": {
+          "type": "string",
+          "scope": "window",
+          "default": "json5-fmt: on",
+          "description": "%json5.format.endIgnoreDirective.desc%"
+        },
         "json5.trace.server": {
           "type": "string",
           "scope": "window",
@@ -203,7 +215,7 @@
     "jsonValidation": [
       {
         "fileMatch": "*.schema.json5",
-        "url": "http://json-schema.org/draft-07/schema#"
+        "url": "https://json-schema.org/draft-07/schema#"
       }
     ],
     "commands": [
@@ -220,8 +232,8 @@
     ]
   },
   "dependencies": {
-    "@blueglassblock/json5-kit": "0.2.3",
-    "@blueglassblock/json5-languageservice": "^0.5.1",
+    "@blueglassblock/json5-kit": "^0.3.0",
+    "@blueglassblock/json5-languageservice": "^0.7.0",
     "@vscode/l10n": "^0.0.18",
     "request-light": "^0.8.0",
     "vscode-languageclient": "^10.0.0-next.13",
@@ -231,9 +243,12 @@
   "devDependencies": {
     "@types/node": "22.x",
     "@types/vscode": "^1.101.0",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.36.0",
     "@vscode/test-web": "^0.0.71",
-    "@vscode/vsce": "^3.2.1",
+    "@vscode/vsce": "^3.6.0",
     "assert": "^2.1.0",
+    "eslint": "^9.31.0",
     "ovsx": "^0.10.5",
     "process": "^0.11.10",
     "ts-loader": "^9.5.1",
