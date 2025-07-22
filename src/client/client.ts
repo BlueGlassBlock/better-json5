@@ -821,10 +821,11 @@ function isSchemaResolveError(d: Diagnostic) {
 export class JSON5ColorProvider implements DocumentColorProvider {
 	provideDocumentColors(document: TextDocument): ColorInformation[] {
 		const text = document.getText();
-		const regex = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
 		const results: ColorInformation[] = [];
 		let match: RegExpExecArray | null;
-		while ((match = regex.exec(text))) {
+
+		const hexRegex = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+		while ((match = hexRegex.exec(text))) {
 			const hex = match[0];
 			let r: number, g: number, b: number, a: number;
 			switch (hex.length) {
@@ -846,17 +847,60 @@ export class JSON5ColorProvider implements DocumentColorProvider {
 					b = parseInt(hex[3] + hex[3], 16) / 255;
 					a = parseInt(hex[4] + hex[4], 16) / 255;
 					break;
-				default: // 4: #RGB
+				default: // #RGB
 					r = parseInt(hex[1] + hex[1], 16) / 255;
 					g = parseInt(hex[2] + hex[2], 16) / 255;
 					b = parseInt(hex[3] + hex[3], 16) / 255;
 					a = 1;
 			}
-			const color = new Color(r, g, b, a);
 			const start = document.positionAt(match.index);
 			const end = document.positionAt(match.index + hex.length);
-			results.push(new ColorInformation(new Range(start, end), color));
+			results.push(new ColorInformation(new Range(start, end), new Color(r, g, b, a)));
 		}
+
+		const rgbRegex = /\b(rgba?)\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(0|1|0?\.\d+))?\s*\)/gi;
+		while ((match = rgbRegex.exec(text))) {
+			const func = match[1].toLowerCase();
+			const r = Math.min(255, parseInt(match[2], 10)) / 255;
+			const g = Math.min(255, parseInt(match[3], 10)) / 255;
+			const b = Math.min(255, parseInt(match[4], 10)) / 255;
+			const a = func === 'rgba' && match[5] !== undefined ? parseFloat(match[5]) : 1;
+			const start = document.positionAt(match.index);
+			const end = document.positionAt(match.index + match[0].length);
+			results.push(new ColorInformation(new Range(start, end), new Color(r, g, b, a)));
+		}
+
+		const hslRegex = /\b(hsla?)\(\s*(\d{1,3})\s*,\s*(\d{1,3})%\s*,\s*(\d{1,3})%(?:\s*,\s*(0|1|0?\.\d+))?\s*\)/gi;
+		while ((match = hslRegex.exec(text))) {
+			const func = match[1].toLowerCase();
+			const hNorm = (parseInt(match[2], 10) % 360) / 360;
+			const sNorm = Math.min(100, parseInt(match[3], 10)) / 100;
+			const lNorm = Math.min(100, parseInt(match[4], 10)) / 100;
+			const alpha = func === 'hsla' && match[5] !== undefined ? parseFloat(match[5]) : 1;
+			// HSL -> RGB
+			let r: number, g: number, b: number;
+			if (sNorm === 0) {
+				r = g = b = lNorm;
+			} else {
+				const q = lNorm < 0.5 ? lNorm * (1 + sNorm) : lNorm + sNorm - lNorm * sNorm;
+				const p = 2 * lNorm - q;
+				const hue2rgb = (p: number, q: number, t: number) => {
+					if (t < 0) { t += 1 };
+					if (t > 1) { t -= 1 };
+					if (t < 1 / 6) { return p + (q - p) * 6 * t };
+					if (t < 1 / 2) { return q };
+					if (t < 2 / 3) { return p + (q - p) * (2 / 3 - t) * 6 };
+					return p;
+				};
+				r = hue2rgb(p, q, hNorm + 1 / 3);
+				g = hue2rgb(p, q, hNorm);
+				b = hue2rgb(p, q, hNorm - 1 / 3);
+			}
+			const start = document.positionAt(match.index);
+			const end = document.positionAt(match.index + match[0].length);
+			results.push(new ColorInformation(new Range(start, end), new Color(r, g, b, alpha)));
+		}
+
 		return results;
 	}
 
@@ -864,17 +908,65 @@ export class JSON5ColorProvider implements DocumentColorProvider {
 		color: Color,
 		context: { document: TextDocument; range: Range }
 	): ColorPresentation[] {
-		const toHex = (v: number) =>
-			Math.round(v * 255)
-				.toString(16)
-				.padStart(2, '0');
+		const orig = context.document.getText(context.range);
+		const trimmed = orig.trim();
+		const lower = trimmed.toLowerCase();
+		let text: string;
 
-		const hex = color.alpha < 1
-			? `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}${toHex(color.alpha)}`
-			: `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}`;
+		if (lower.startsWith('rgb(')) {
+			const r = Math.round(color.red * 255);
+			const g = Math.round(color.green * 255);
+			const b = Math.round(color.blue * 255);
+			text = `rgb(${r}, ${g}, ${b})`;
+		} else if (lower.startsWith('rgba(')) {
+			const r = Math.round(color.red * 255);
+			const g = Math.round(color.green * 255);
+			const b = Math.round(color.blue * 255);
+			const a = +color.alpha.toFixed(2).replace(/\.?0+$/, '');
+			text = `rgba(${r}, ${g}, ${b}, ${a})`;
+		} else if (lower.startsWith('hsl(') || lower.startsWith('hsla(')) {
+			// RGB -> HSL
+			const r = color.red, g = color.green, b = color.blue;
+			const max = Math.max(r, g, b), min = Math.min(r, g, b);
+			const l = (max + min) / 2;
+			const d = max - min;
+			let h: number, s: number;
+			if (d === 0) {
+				h = 0; s = 0;
+			} else {
+				s = d / (1 - Math.abs(2 * l - 1));
+				switch (max) {
+					case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+					case g: h = ((b - r) / d + 2) / 6; break;
+					default: h = ((r - g) / d + 4) / 6;
+				}
+			}
+			const hDeg = Math.round(h * 360);
+			const sPct = Math.round(s * 100);
+			const lPct = Math.round(l * 100);
+			if (lower.startsWith('hsla(')) {
+				const a = +color.alpha.toFixed(2).replace(/\.?0+$/, '');
+				text = `hsla(${hDeg}, ${sPct}%, ${lPct}%, ${a})`;
+			} else {
+				text = `hsl(${hDeg}, ${sPct}%, ${lPct}%)`;
+			}
+		} else if (trimmed.startsWith('#')) {
+			const toHex = (v: number) =>
+				Math.round(v * 255).toString(16).padStart(2, '0');
+			text = color.alpha < 1
+				? `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}${toHex(color.alpha)}`
+				: `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}`;
+		} else {
+			// fallback to hex
+			const toHex = (v: number) =>
+				Math.round(v * 255).toString(16).padStart(2, '0');
+			text = color.alpha < 1
+				? `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}${toHex(color.alpha)}`
+				: `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}`;
+		}
 
-		const presentation = new ColorPresentation(hex);
-		presentation.textEdit = TextEdit.replace(context.range, hex);
+		const presentation = new ColorPresentation(text);
+		presentation.textEdit = TextEdit.replace(context.range, text);
 		return [presentation];
 	}
 }
