@@ -5,3 +5,4 @@ better-json5
 dist
 .vscode-test-web
 test.json5
+.out-of-code-insights

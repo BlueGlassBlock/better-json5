@@ -9,7 +9,7 @@ import {
 	workspace, window, languages, commands, LogOutputChannel, ExtensionContext, extensions, Uri, ColorInformation,
 	Diagnostic, StatusBarAlignment, TextEditor, TextDocument, FormattingOptions, CancellationToken, FoldingRange,
 	ProviderResult, TextEdit, Range, Position, Disposable, CompletionItem, CompletionList, CompletionContext, Hover, MarkdownString, FoldingContext, DocumentSymbol, SymbolInformation, l10n,
-	RelativePattern
+	RelativePattern, Color, ColorPresentation, DocumentColorProvider
 } from 'vscode';
 import {
 	LanguageClientOptions, RequestType, NotificationType, FormattingOptions as LSPFormattingOptions, DocumentDiagnosticReportKind, Diagnostic as LSPDiagnostic,
@@ -167,6 +167,13 @@ export interface AsyncDisposable {
 export async function startClient(context: ExtensionContext, newLanguageClient: LanguageClientConstructor, runtime: Runtime): Promise<AsyncDisposable> {
 	const languageParticipants = getLanguageParticipants();
 	context.subscriptions.push(languageParticipants);
+	// register the color provider for json5 files
+	context.subscriptions.push(
+		languages.registerColorProvider(
+			{ language: 'json5', scheme: 'file' },
+			new JSON5ColorProvider()
+		)
+	);
 
 	let client: Disposable | undefined = await startClientWithParticipants(context, languageParticipants, newLanguageClient, runtime);
 
@@ -809,4 +816,65 @@ function updateMarkdownString(h: MarkdownString): MarkdownString {
 
 function isSchemaResolveError(d: Diagnostic) {
 	return d.code === /* SchemaResolveError */ 0x300;
+}
+
+export class JSON5ColorProvider implements DocumentColorProvider {
+	provideDocumentColors(document: TextDocument): ColorInformation[] {
+		const text = document.getText();
+		const regex = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+		const results: ColorInformation[] = [];
+		let match: RegExpExecArray | null;
+		while ((match = regex.exec(text))) {
+			const hex = match[0];
+			let r: number, g: number, b: number, a: number;
+			switch (hex.length) {
+				case 9: // #RRGGBBAA
+					r = parseInt(hex.slice(1, 3), 16) / 255;
+					g = parseInt(hex.slice(3, 5), 16) / 255;
+					b = parseInt(hex.slice(5, 7), 16) / 255;
+					a = parseInt(hex.slice(7, 9), 16) / 255;
+					break;
+				case 7: // #RRGGBB
+					r = parseInt(hex.slice(1, 3), 16) / 255;
+					g = parseInt(hex.slice(3, 5), 16) / 255;
+					b = parseInt(hex.slice(5, 7), 16) / 255;
+					a = 1;
+					break;
+				case 5: // #RGBA
+					r = parseInt(hex[1] + hex[1], 16) / 255;
+					g = parseInt(hex[2] + hex[2], 16) / 255;
+					b = parseInt(hex[3] + hex[3], 16) / 255;
+					a = parseInt(hex[4] + hex[4], 16) / 255;
+					break;
+				default: // 4: #RGB
+					r = parseInt(hex[1] + hex[1], 16) / 255;
+					g = parseInt(hex[2] + hex[2], 16) / 255;
+					b = parseInt(hex[3] + hex[3], 16) / 255;
+					a = 1;
+			}
+			const color = new Color(r, g, b, a);
+			const start = document.positionAt(match.index);
+			const end = document.positionAt(match.index + hex.length);
+			results.push(new ColorInformation(new Range(start, end), color));
+		}
+		return results;
+	}
+
+	provideColorPresentations(
+		color: Color,
+		context: { document: TextDocument; range: Range }
+	): ColorPresentation[] {
+		const toHex = (v: number) =>
+			Math.round(v * 255)
+				.toString(16)
+				.padStart(2, '0');
+
+		const hex = color.alpha < 1
+			? `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}${toHex(color.alpha)}`
+			: `#${toHex(color.red)}${toHex(color.green)}${toHex(color.blue)}`;
+
+		const presentation = new ColorPresentation(hex);
+		presentation.textEdit = TextEdit.replace(context.range, hex);
+		return [presentation];
+	}
 }
