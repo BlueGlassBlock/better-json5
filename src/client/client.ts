@@ -93,6 +93,7 @@ type Settings = {
 		};
 		keepLines?: { enable?: boolean };
 		validate?: { enable?: boolean };
+		decorateAllColors?: boolean;
 		resultLimit?: number;
 		foldingLimit?: number;
 		colorDecorationLimit?: number;
@@ -123,6 +124,7 @@ export namespace SettingIds {
 	export const enableValidation = 'json5.validate.enable';
 	export const enableSchemaDownload = 'json5.schemaDownload.enable';
 	export const maxItemsComputed = 'json5.maxItemsComputed';
+	export const decorateAllColors = 'json5.decorateAllColors';
 	export const editorFoldingMaximumRegions = 'editor.foldingMaximumRegions';
 	export const editorColorDecoratorsLimit = 'editor.colorDecoratorsLimit';
 
@@ -702,6 +704,7 @@ function getSettings(): Settings {
 				startIgnoreDirective: configuration.get(SettingIds.startIgnoreDirective),
 				endIgnoreDirective: configuration.get(SettingIds.endIgnoreDirective)
 			},
+			decorateAllColors: configuration.get(SettingIds.decorateAllColors),
 			keepLines: { enable: configuration.get(SettingIds.enableKeepLines) },
 			schemas,
 			resultLimit: resultLimit + 1, // ask for one more so we can detect if the limit has been exceeded

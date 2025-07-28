@@ -219,6 +219,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 			};
 			keepLines?: { enable?: boolean };
 			validate?: { enable?: boolean };
+			decorateAllColors?: boolean;
 			resultLimit?: number;
 			foldingLimit?: number;
 			colorDecoratorLimit?: number;
@@ -243,6 +244,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	let formatterRegistrations: Thenable<Disposable>[] | null = null;
 	let validateEnabled = true;
 	let keepLinesEnabled = false;
+	let decorateAllColors = false;
 	let trailingCommasOption: undefined | 'none' | 'all' = undefined;
 	let keyQuotesOption: undefined | 'single' | 'double' | 'none-single' | 'none-double' = undefined;
 	let stringQuotesOption: undefined | 'single' | 'double' = undefined;
@@ -257,6 +259,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		jsonConfigurationSettings = settings.json5?.schemas;
 		validateEnabled = !!settings.json5?.validate?.enable;
 		keepLinesEnabled = settings.json5?.keepLines?.enable || false;
+		decorateAllColors = settings.json5?.decorateAllColors || false;
 		trailingCommasOption = settings.json5?.format?.trailingCommas === 'keep' ? undefined : settings.json5?.format?.trailingCommas;
 		keyQuotesOption = settings.json5?.format?.keyQuotes === 'keep' ? undefined : settings.json5?.format?.keyQuotes;
 		stringQuotesOption = settings.json5?.format?.stringQuotes === 'keep' ? undefined : settings.json5?.format?.stringQuotes;
@@ -352,6 +355,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	function updateConfiguration(extraSchemas?: SchemaConfiguration[]) {
 		const languageSettings = {
 			validate: validateEnabled,
+			decorateAllColors,
 			schemas: new Array<SchemaConfiguration>(),
 			keyQuotes: keyQuotesOption,
 			stringQuotes: stringQuotesOption,

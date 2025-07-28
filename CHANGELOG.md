@@ -1,6 +1,9 @@
 # CHANGELOG
 
+## 1.6.0
+
 - Fixed schema cache and real-time updates for file-referencing schemas.
+- Added `json5.decorateAllColors` setting to control whether all color strings should be decorated in the editor. If set to `false`, only colors that are marked as format `color` or `color-hex` will be decorated. ([#18](https://github.com/BlueGlassBlock/better-json5/pulls/18))
 
 ## 1.5.0
 
