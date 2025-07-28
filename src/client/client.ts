@@ -221,11 +221,8 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		if (isClientReady && runtime.schemaRequests.clearCache) {
 			const cachedSchemas = await runtime.schemaRequests.clearCache();
 			await client.sendNotification(SchemaContentChangeNotification.type, cachedSchemas);
-			window.showInformationMessage(l10n.t('JSON5 schema cache fully cleared.'));
 		}
-		else {
-			window.showErrorMessage(l10n.t('Unable to purge cache, triggered settings update instead.'));
-		}
+		window.showInformationMessage(l10n.t('JSON5 schema cache fully cleared.'));
 	}));
 
 	toDispose.push(commands.registerCommand('json5.validate', async (schemaUri: Uri, content: string) => {
@@ -280,7 +277,8 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		synchronize: {
 			// Synchronize the setting section 'json5' to the server
 			configurationSection: ['json5', 'http'],
-			fileEvents: workspace.createFileSystemWatcher('**/*.json')
+			// Watch json5 and json files in the workspace for schema changes
+			fileEvents: [workspace.createFileSystemWatcher('**/*.json5'), workspace.createFileSystemWatcher('**/*.json')]
 		},
 		middleware: {
 			workspace: {

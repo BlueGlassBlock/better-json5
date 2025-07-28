@@ -85,7 +85,7 @@ async function getSchemaRequestService(context: ExtensionContext, log: LogOutput
 	const globalStorage = context.globalStorageUri;
 
 	let clearCache: (() => Promise<string[]>) | undefined;
-	if (globalStorage.scheme === 'file') {
+	if (globalStorage.scheme === 'file' || globalStorage.scheme === 'vscode-userdata') {
 		const schemaCacheLocation = path.join(globalStorage.fsPath, 'json-schema-cache');
 		await fs.mkdir(schemaCacheLocation, { recursive: true });
 

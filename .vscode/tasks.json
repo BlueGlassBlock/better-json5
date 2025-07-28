@@ -5,7 +5,7 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "compile-web",
+			"script": "compile",
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -17,7 +17,7 @@
 		},
 		{
 			"type": "npm",
-			"script": "watch-web",
+			"script": "watch",
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": [

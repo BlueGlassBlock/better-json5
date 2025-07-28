@@ -1,5 +1,7 @@
 # CHANGELOG
 
+- Fixed schema cache and real-time updates for file-referencing schemas.
+
 ## 1.5.0
 
 - Fixed syntax highlighting for comments in objects.

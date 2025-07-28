@@ -4,7 +4,7 @@
 // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 {
 	"version": "0.2.0",
-	"configurations": [		
+	"configurations": [
 		{
 			"name": "Extension",
 			"type": "extensionHost",
@@ -12,21 +12,26 @@
 			"args": [
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}"
-			]
+			],
+			"preLaunchTask": "npm: compile-dbg"
 		},
 		{
-			"name": "Run Web Extension ",
+			"name": "Run Web Extension",
 			"type": "extensionHost",
 			"debugWebWorkerHost": true,
 			"request": "launch",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionDevelopmentKind=web"
+				"--extensionDevelopmentKind=web",
+				"--disable-extensions"
 			],
-			"outFiles": [
-				"${workspaceFolder}/dist/browser/*.js"
-			],
-			"preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "npm: compile-dbg"
+		},
+		{
+			"name": "Attach Language Server",
+			"type": "node",
+			"request": "attach",
+			"processId": "${command:PickProcess}"
 		}
 	]
 }

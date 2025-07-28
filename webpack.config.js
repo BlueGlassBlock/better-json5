@@ -45,7 +45,13 @@ const clientBrowserConfig = {
 			test: /\.ts$/,
 			exclude: /node_modules/,
 			use: [{
-				loader: 'ts-loader'
+				loader: 'ts-loader',
+				options: {
+					compilerOptions: {
+						'sourceMap': true,
+					},
+					onlyCompileBundledFiles: true,
+				}
 			}]
 		}]
 	},
@@ -93,7 +99,7 @@ const clientNodeConfig = {
 			exclude: /node_modules/,
 			use: [{
 				loader: 'ts-loader',
-				options:  {
+				options: {
 					compilerOptions: {
 						'sourceMap': true,
 					},
@@ -150,7 +156,13 @@ const serverBrowserConfig = {
 			test: /\.ts$/,
 			exclude: /node_modules/,
 			use: [{
-				loader: 'ts-loader'
+				loader: 'ts-loader',
+				options: {
+					compilerOptions: {
+						'sourceMap': true,
+					},
+					onlyCompileBundledFiles: true,
+				}
 			}]
 		}]
 	},
@@ -197,7 +209,13 @@ const serverNodeConfig = {
 			test: /\.ts$/,
 			exclude: /node_modules/,
 			use: [{
-				loader: 'ts-loader'
+				loader: 'ts-loader',
+				options: {
+					compilerOptions: {
+						'sourceMap': true,
+					},
+					onlyCompileBundledFiles: true,
+				}
 			}]
 		}]
 	},
@@ -218,4 +236,4 @@ const serverNodeConfig = {
 	},
 };
 
-module.exports = [clientBrowserConfig, clientNodeConfig, serverBrowserConfig, serverNodeConfig ];
+module.exports = [clientBrowserConfig, clientNodeConfig, serverBrowserConfig, serverNodeConfig];
