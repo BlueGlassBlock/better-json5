@@ -27,7 +27,6 @@
     }
   },
   "activationEvents": [
-    "onLanguage:json5",
     "onCommand:json5.validate"
   ],
   "categories": [
