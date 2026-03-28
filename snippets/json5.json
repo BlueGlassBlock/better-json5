@@ -1,0 +1,299 @@
+{
+	"JSON5 - Empty Object": {
+		"prefix": ["json5-object", "json5-obj", "obj"],
+		"body": [
+			"{",
+			"\t$1",
+			"}"
+		],
+		"description": "Creates an empty JSON5 object"
+	},
+	"JSON5 - Empty Array": {
+		"prefix": ["json5-array", "json5-arr", "arr"],
+		"body": [
+			"[",
+			"\t$1",
+			"]"
+		],
+		"description": "Creates an empty JSON5 array"
+	},
+	"JSON5 - Key-Value": {
+		"prefix": ["json5-keyvalue", "json5-kv", "kv"],
+		"body": "\"$1\": $2",
+		"description": "Creates a key-value pair"
+	},
+	"JSON5 - Key with String": {
+		"prefix": ["json5-key-string", "json5-ks"],
+		"body": "\"$1\": \"$2\"",
+		"description": "Key with string value"
+	},
+	"JSON5 - Key with Number": {
+		"prefix": ["json5-key-number", "json5-kn"],
+		"body": "\"$1\": $2",
+		"description": "Key with number value"
+	},
+	"JSON5 - Key with Boolean": {
+		"prefix": ["json5-key-boolean", "json5-kb"],
+		"body": "\"$1\": ${1|true,false|}",
+		"description": "Key with boolean value"
+	},
+	"JSON5 - Key with Null": {
+		"prefix": ["json5-key-null", "json5-knull"],
+		"body": "\"$1\": null",
+		"description": "Key with null value"
+	},
+	"JSON5 - Key with Array": {
+		"prefix": ["json5-key-array", "json5-ka"],
+		"body": [
+			"\"$1\": [",
+			"\t$2",
+			"]"
+		],
+		"description": "Key with array value"
+	},
+	"JSON5 - Key with Object": {
+		"prefix": ["json5-key-object", "json5-ko"],
+		"body": [
+			"\"$1\": {",
+			"\t$2",
+			"}"
+		],
+		"description": "Key with object value"
+	},
+	"JSON5 - Nested Object": {
+		"prefix": ["json5-nested", "nested"],
+		"body": [
+			"{",
+			"\t\"$1\": {",
+			"\t\t\"$2\": $3",
+			"\t}",
+			"}"
+		],
+		"description": "Creates a nested object structure"
+	},
+	"JSON5 - Array of Objects": {
+		"prefix": ["json5-array-objects", "json5-aro"],
+		"body": [
+			"[",
+			"\t{",
+			"\t\t\"$1\": $2",
+			"\t}",
+			"]"
+		],
+		"description": "Array containing objects"
+	},
+	"JSON5 - Multi-line String": {
+		"prefix": ["json5-multiline", "json5-ml"],
+		"body": "\"$1\n$2\n$3\"",
+		"description": "Multi-line string value"
+	},
+	"JSON5 - Comment Line": {
+		"prefix": ["json5-comment-line", "json5-comment", "//"],
+		"body": "// $1",
+		"description": "Line comment"
+	},
+	"JSON5 - Comment Block": {
+		"prefix": ["json5-comment-block", "json5-cb", "/*"],
+		"body": [
+			"/*",
+			" * $1",
+			" */"
+		],
+		"description": "Block comment"
+	},
+	"JSON5 - ID Field": {
+		"prefix": ["json5-id", "idfield"],
+		"body": "\"id\": \"${1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}\"",
+		"description": "UUID ID field"
+	},
+	"JSON5 - Name Field": {
+		"prefix": ["json5-name", "namefield"],
+		"body": "\"name\": \"${1:example}\"",
+		"description": "Name field"
+	},
+	"JSON5 - Type Field": {
+		"prefix": ["json5-type", "typefield"],
+		"body": "\"type\": \"${1:string}\"",
+		"description": "Type field"
+	},
+	"JSON5 - Email Field": {
+		"prefix": ["json5-email", "emailfield"],
+		"body": "\"email\": \"${1:user@example.com}\"",
+		"description": "Email field"
+	},
+	"JSON5 - URL Field": {
+		"prefix": ["json5-url", "urlfield"],
+		"body": "\"url\": \"${1:https://example.com}\"",
+		"description": "URL field"
+	},
+	"JSON5 - Date Field": {
+		"prefix": ["json5-date", "datefield"],
+		"body": "\"date\": \"${1:2024-01-01}\"",
+		"description": "Date field (ISO 8601)"
+	},
+	"JSON5 - DateTime Field": {
+		"prefix": ["json5-datetime", "datetimefield"],
+		"body": "\"createdAt\": \"${1:2024-01-01T00:00:00Z}\"",
+		"description": "DateTime field (ISO 8601)"
+	},
+	"JSON5 - Boolean Field": {
+		"prefix": ["json5-enabled", "enabledfield"],
+		"body": "\"enabled\": ${1|true,false|}",
+		"description": "Enabled/disabled field"
+	},
+	"JSON5 - Count Field": {
+		"prefix": ["json5-count", "countfield"],
+		"body": "\"count\": ${1:0}",
+		"description": "Count/number field"
+	},
+	"JSON5 - Price Field": {
+		"prefix": ["json5-price", "pricefield"],
+		"body": "\"price\": ${1:0.00}",
+		"description": "Price/currency field"
+	},
+	"JSON5 - Tags Field": {
+		"prefix": ["json5-tags", "tagsfield"],
+		"body": [
+			"\"tags\": [",
+			"\t\"${1:tag1}\",",
+			"\t\"${2:tag2}\"",
+			"]"
+		],
+		"description": "Tags/array field"
+	},
+	"JSON5 - Metadata Field": {
+		"prefix": ["json5-metadata", "metadatafield"],
+		"body": [
+			"\"metadata\": {",
+			"\t\"$1\": \"$2\"",
+			"}"
+		],
+		"description": "Metadata object field"
+	},
+	"JSON5 - Config Field": {
+		"prefix": ["json5-config", "configfield"],
+		"body": [
+			"\"config\": {",
+			"\t\"$1\": $2",
+			"}"
+		],
+		"description": "Configuration object field"
+	},
+	"JSON5 - Settings Field": {
+		"prefix": ["json5-settings", "settingsfield"],
+		"body": [
+			"\"settings\": {",
+			"\t\"$1\": ${2|true,false|}",
+			"}"
+		],
+		"description": "Settings object field"
+	},
+	"JSON5 - Items Field": {
+		"prefix": ["json5-items", "itemsfield"],
+		"body": [
+			"\"items\": [",
+			"\t{",
+			"\t\t\"id\": \"$1\",",
+			"\t\t\"name\": \"$2\"",
+			"\t}",
+			"]"
+		],
+		"description": "Items array with id and name"
+	},
+	"JSON5 - Pagination": {
+		"prefix": ["json5-pagination", "pagination"],
+		"body": [
+			"{",
+			"\t\"page\": ${1:1},",
+			"\t\"limit\": ${2:10},",
+			"\t\"total\": ${3:100}",
+			"}"
+		],
+		"description": "Pagination object"
+	},
+	"JSON5 - Error Response": {
+		"prefix": ["json5-error", "errorresponse"],
+		"body": [
+			"{",
+			"\t\"error\": {",
+			"\t\t\"code\": \"${1:ERROR_CODE}\",",
+			"\t\t\"message\": \"${2:Error message}\"",
+			"\t}",
+			"}"
+		],
+		"description": "Error response object"
+	},
+	"JSON5 - Success Response": {
+		"prefix": ["json5-success", "successresponse"],
+		"body": [
+			"{",
+			"\t\"success\": true,",
+			"\t\"data\": {",
+			"\t\t$1",
+			"\t}",
+			"}"
+		],
+		"description": "Success response object"
+	},
+	"JSON5 - Package.json Template": {
+		"prefix": ["json5-package", "packagejson"],
+		"body": [
+			"{",
+			"\t\"name\": \"${1:my-package}\",",
+			"\t\"version\": \"${2:1.0.0}\",",
+			"\t\"description\": \"${3:Package description}\",",
+			"\t\"main\": \"${4:index.js}\",",
+			"\t\"scripts\": {",
+			"\t\t\"test\": \"${5:npm test}\"",
+			"\t},",
+			"\t\"keywords\": [\"${6:keyword}\"],",
+			"\t\"author\": \"${7:Name}\",",
+			"\t\"license\": \"${8:MIT}\"",
+			"}"
+		],
+		"description": "package.json template"
+	},
+	"JSON5 - tsconfig Template": {
+		"prefix": ["json5-tsconfig", "tsconfig"],
+		"body": [
+			"{",
+			"\t\"compilerOptions\": {",
+			"\t\t\"target\": \"${1:ES2020}\",",
+			"\t\t\"module\": \"${2:commonjs}\",",
+			"\t\t\"strict\": ${3:true},",
+			"\t\t\"esModuleInterop\": ${4:true},",
+			"\t\t\"skipLibCheck\": ${5:true},",
+			"\t\t\"forceConsistentCasingInFileNames\": ${6:true}",
+			"\t}",
+			"\t\"include\": [\"${7:src/**/*}\"],",
+			"\t\"exclude\": [\"${8:node_modules}\"]",
+			"}"
+		],
+		"description": "tsconfig.json template"
+	},
+	"JSON5 - JSON Server Database": {
+		"prefix": ["json5-db", "json-server"],
+		"body": [
+			"{",
+			"\t\"posts\": [",
+			"\t\t{",
+			"\t\t\t\"id\": 1,",
+			"\t\t\t\"title\": \"${1:Post title}\",",
+			"\t\t\t\"author\": \"${2:Author name}\"",
+			"\t\t}",
+			"\t],",
+			"\t\"comments\": [",
+			"\t\t{",
+			"\t\t\t\"id\": 1,",
+			"\t\t\t\"body\": \"${3:Comment text}\",",
+			"\t\t\t\"postId\": 1",
+			"\t\t}",
+			"\t],",
+			"\t\"profile\": {",
+			"\t\t\"name\": \"${4:Name}\"",
+			"\t}",
+			"}"
+		],
+		"description": "JSON Server db.json template"
+	}
+}

@@ -10,6 +10,7 @@ import {
 } from 'vscode-languageserver';
 
 import { runSafe, runSafeAsync } from './utils/runner';
+import { enrichCompletionList, filterAndSortCompletions, createDefaultSnippets } from './utils/completions';
 import { DiagnosticsSupport, registerDiagnosticsPullSupport, registerDiagnosticsPushSupport } from './utils/validation';
 import { TextDocument, JSONDocument, JSONSchema, getLanguageService, DocumentLanguageSettings, SchemaConfiguration, ClientCapabilities, Range, Position, SortOptions, FormattingOptions } from '@blueglassblock/json5-languageservice';
 import { getLanguageModelCache } from './languageModelCache';
@@ -430,22 +431,46 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	connection.onCompletion((textDocumentPosition, token) => {
 		return runSafeAsync(runtime, async () => {
 			const document = documents.get(textDocumentPosition.textDocument.uri);
-			if (document) {
-				const jsonDocument = getJSONDocument(document);
-				return languageService.doComplete(document, textDocumentPosition.position, jsonDocument);
-			}
-			return null;
+			if (!document) return null;
+			
+			const jsonDocument = getJSONDocument(document);
+			let completions = await languageService.doComplete(document, textDocumentPosition.position, jsonDocument);
+			
+			if (!completions) return createDefaultSnippets();
+			
+			let items: any[];
+			if (Array.isArray(completions)) items = completions;
+			else if ('items' in completions) items = completions.items;
+			else items = [];
+			
+			const enriched = enrichCompletionList(items);
+			const defaults = createDefaultSnippets();
+			const filtered = filterAndSortCompletions([...enriched, ...defaults], 500);
+			
+			if (Array.isArray(completions)) return filtered;
+			if ('items' in completions) return { isIncomplete: completions.isIncomplete, items: filtered };
+			return filtered;
 		}, null, `Error while computing completions for ${textDocumentPosition.textDocument.uri}`, token);
 	});
 
 	connection.onHover((textDocumentPositionParams, token) => {
 		return runSafeAsync(runtime, async () => {
 			const document = documents.get(textDocumentPositionParams.textDocument.uri);
-			if (document) {
-				const jsonDocument = getJSONDocument(document);
-				return languageService.doHover(document, textDocumentPositionParams.position, jsonDocument);
+			if (!document) return null;
+			
+			const jsonDocument = getJSONDocument(document);
+			const hover = await languageService.doHover(document, textDocumentPositionParams.position, jsonDocument);
+			
+			if (!hover) return null;
+			
+			const contents = hover.contents;
+			if (typeof contents === 'object' && 'value' in contents) {
+				const value = contents.value as string;
+				if (!value.includes('**')) {
+					contents.value = `📋 **Informação do Schema**\n\n${value}`;
+				}
 			}
-			return null;
+			return hover;
 		}, null, `Error while computing hover for ${textDocumentPositionParams.textDocument.uri}`, token);
 	});
 
