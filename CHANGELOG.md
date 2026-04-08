@@ -7,6 +7,7 @@
 - Removed unnecessary activation event. ([#20](https://github.com/BlueGlassBlock/better-json5/pull/20))
 - Implemented TrustDomain configuration.
 - Implemented workspace trust check for schema downloading and schema-based features.
+- Rebrand the icon to use Dark 2026 color theme.
 
 ## 1.6.0
 
