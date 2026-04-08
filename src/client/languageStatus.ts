@@ -6,9 +6,9 @@
 import {
 	window, languages, Uri, Disposable, commands, QuickPickItem,
 	extensions, workspace, Extension, WorkspaceFolder, QuickPickItemKind,
-	ThemeIcon, TextDocument, LanguageStatusSeverity, l10n, DocumentSelector
+	ThemeIcon, TextDocument, LanguageStatusSeverity, l10n, DocumentSelector, Diagnostic
 } from 'vscode';
-import { JSONLanguageStatus, JSONSchemaSettings } from './client';
+import { JSONLanguageStatus, JSONSchemaSettings, CommandIds, ErrorCodes, isSchemaResolveError, SettingIds, SchemaRequestServiceErrors } from './client';
 
 type ShowSchemasInput = {
 	schemas: string[];
@@ -168,7 +168,7 @@ export function createLanguageStatusItem(documentSelector: DocumentSelector, sta
 	statusItem.name = l10n.t('JSON5 Validation Status');
 	statusItem.severity = LanguageStatusSeverity.Information;
 
-	const showSchemasCommand = commands.registerCommand('_json5.showAssociatedSchemaList', showSchemaList);
+	const showSchemasCommand = commands.registerCommand(CommandIds.showAssociatedSchemaList, showSchemaList);
 
 	const activeEditorListener = window.onDidChangeActiveTextEditor(() => {
 		updateLanguageStatus();
@@ -195,7 +195,7 @@ export function createLanguageStatusItem(documentSelector: DocumentSelector, sta
 					statusItem.detail = l10n.t('multiple JSON schemas configured');
 				}
 				statusItem.command = {
-					command: '_json5.showAssociatedSchemaList',
+					command: CommandIds.showAssociatedSchemaList,
 					title: l10n.t('Show Schemas'),
 					arguments: [{ schemas, uri: document.uri.toString() } satisfies ShowSchemasInput]
 				};
@@ -275,6 +275,80 @@ export function createDocumentSymbolsLimitItem(documentSelector: DocumentSelecto
 	statusItem.text = l10n.t('Outline');
 	statusItem.detail = l10n.t('only {0} document symbols shown for performance reasons', limit);
 	statusItem.command = { command: openSettingsCommand, arguments: [settingId], title: configureSettingsLabel };
+	return Disposable.from(statusItem);
+}
+
+export function createSchemaLoadStatusItem(newItem: (diagnostic: Diagnostic) => Disposable) {
+	let statusItem: Disposable | undefined;
+	const activeErrors: Map<string, Diagnostic> = new Map();
+
+	const toDispose: Disposable[] = [];
+	toDispose.push(window.onDidChangeActiveTextEditor(textEditor => {
+		statusItem?.dispose();
+		statusItem = undefined;
+		const doc = textEditor?.document;
+		if (doc) {
+			const diagnostic = activeErrors.get(doc.uri.toString());
+			if (diagnostic) {
+				statusItem = newItem(diagnostic);
+			}
+		}
+	}));
+	toDispose.push(workspace.onDidCloseTextDocument(document => {
+		activeErrors.delete(document.uri.toString());
+	}));
+
+	function update(uri: Uri, diagnostics: Diagnostic[]) {
+		const schemaError = diagnostics.find(isSchemaResolveError);
+		const uriString = uri.toString();
+		if (schemaError) {
+			activeErrors.set(uriString, schemaError);
+			if (window.activeTextEditor?.document.uri.toString() === uriString) {
+				statusItem?.dispose();
+				statusItem = newItem(schemaError);
+			}
+		} else {
+			activeErrors.delete(uriString);
+			if (window.activeTextEditor?.document.uri.toString() === uriString) {
+				statusItem?.dispose();
+				statusItem = undefined;
+			}
+		}
+	}
+
+	return {
+		update,
+		dispose() {
+			statusItem?.dispose();
+			toDispose.forEach(d => d.dispose());
+			toDispose.length = 0;
+			statusItem = undefined;
+			activeErrors.clear();
+		}
+	};
+}
+
+export function createSchemaLoadIssueItem(documentSelector: DocumentSelector, _schemaDownloadEnabled: boolean, diagnostic: Diagnostic): Disposable {
+	const statusItem = languages.createLanguageStatusItem('json5.schemaLoadStatus', documentSelector);
+	statusItem.name = l10n.t('JSON5: Schema Load Status');
+	statusItem.severity = LanguageStatusSeverity.Warning;
+	statusItem.text = l10n.t('Schema');
+
+	const errorCode = typeof diagnostic.code === 'number' ? diagnostic.code & ~ErrorCodes.SchemaResolveError : undefined;
+
+	if (errorCode === SchemaRequestServiceErrors.UntrustedWorkspaceError) {
+		statusItem.detail = l10n.t('Downloading schemas is disabled in untrusted workspaces');
+		statusItem.command = { command: CommandIds.workbenchTrustManage, title: l10n.t('Manage Workspace Trust') };
+	} else if (errorCode === SchemaRequestServiceErrors.HTTPDisabledError) {
+		statusItem.detail = l10n.t('Downloading schemas is disabled');
+		statusItem.command = { command: openSettingsCommand, arguments: [SettingIds.enableSchemaDownload], title: configureSettingsLabel };
+	} else if (errorCode === SchemaRequestServiceErrors.UntrustedSchemaError) {
+		statusItem.detail = l10n.t('Schema location is untrusted');
+		statusItem.command = { command: CommandIds.configureTrustedDomainsCommandId, title: l10n.t('Configure Trusted Domains...'), arguments: [diagnostic.message ? { uri: diagnostic.message } : undefined] };
+	} else {
+		statusItem.detail = l10n.t('Unable to resolve schema');
+		statusItem.command = { command: CommandIds.retryResolveSchemaCommandId, title: l10n.t('Retry') };
+	}
 	return Disposable.from(statusItem);
 }
 

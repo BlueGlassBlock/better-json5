@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.7.0
+
+- Fixed hex number value parsing. ([json5-kit#15](https://github.com/BlueGlassBlock/json5-kit/pull/15))
+- Ensured sorting respects trailingComma settings. ([json5-languageservice#24](https://github.com/BlueGlassBlock/json5-languageservice/pull/24))
+- Removed unnecessary activation event. ([#20](https://github.com/BlueGlassBlock/better-json5/pull/20))
+- Implemented TrustDomain configuration.
+- Implemented workspace trust check for schema downloading and schema-based features.
+
 ## 1.6.0
 
 - Fixed schema cache and real-time updates for file-referencing schemas.

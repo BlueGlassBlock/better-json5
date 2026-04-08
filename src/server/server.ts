@@ -6,12 +6,13 @@
 import {
 	Connection,
 	TextDocuments, InitializeParams, InitializeResult, NotificationType, RequestType,
-	DocumentRangeFormattingRequest, Disposable, ServerCapabilities, TextDocumentSyncKind, TextEdit, DocumentFormattingRequest, TextDocumentIdentifier, Diagnostic, CodeAction, CodeActionKind
+	DocumentRangeFormattingRequest, Disposable, ServerCapabilities, TextDocumentSyncKind, TextEdit, DocumentFormattingRequest, TextDocumentIdentifier, Diagnostic, CodeAction, CodeActionKind,
+	ResponseError
 } from 'vscode-languageserver';
 
 import { runSafe, runSafeAsync } from './utils/runner';
 import { DiagnosticsSupport, registerDiagnosticsPullSupport, registerDiagnosticsPushSupport } from './utils/validation';
-import { TextDocument, JSONDocument, JSONSchema, getLanguageService, DocumentLanguageSettings, SchemaConfiguration, ClientCapabilities, Range, Position, SortOptions, FormattingOptions } from '@blueglassblock/json5-languageservice';
+import { TextDocument, JSONDocument, JSONSchema, getLanguageService, DocumentLanguageSettings, SchemaConfiguration, ClientCapabilities, Range, Position, SortOptions, FormattingOptions, SeverityLevel } from '@blueglassblock/json5-languageservice';
 import { getLanguageModelCache } from './languageModelCache';
 import { Utils, URI } from 'vscode-uri';
 import * as l10n from '@vscode/l10n';
@@ -34,6 +35,10 @@ namespace SchemaContentChangeNotification {
 
 namespace ForceValidateRequest {
 	export const type: RequestType<string, Diagnostic[], any> = new RequestType('json5/validate');
+}
+
+namespace ForceValidateAllRequest {
+	export const type: NotificationType<string> = new NotificationType('json5/validateAll');
 }
 
 namespace LanguageStatusRequest {
@@ -102,8 +107,8 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 			}
 			return connection.sendRequest(VSCodeContentRequest.type, uri).then(responseText => {
 				return responseText;
-			}, error => {
-				return Promise.reject(error.message);
+			}, (error: ResponseError<any>) => {
+				return Promise.reject(error);
 			});
 		};
 	}
@@ -139,7 +144,7 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	// in the passed params the rootPath of the workspace plus the client capabilities.
 	connection.onInitialize((params: InitializeParams): InitializeResult => {
 
-		const initializationOptions = params.initializationOptions as any || {};
+		const initializationOptions = params.initializationOptions || {};
 
 		const handledProtocols = initializationOptions?.handledSchemaProtocols;
 
@@ -218,7 +223,11 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 				endIgnoreDirective?: string;
 			};
 			keepLines?: { enable?: boolean };
-			validate?: { enable?: boolean };
+			validate?: {
+				enable?: boolean;
+				schemaValidation?: SeverityLevel;
+				schemaRequest?: SeverityLevel;
+			};
 			decorateAllColors?: boolean;
 			resultLimit?: number;
 			foldingLimit?: number;
@@ -251,6 +260,8 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 	let tabSizeOption: undefined | true | number = undefined;
 	let startIgnoreDirective: string | undefined = undefined;
 	let endIgnoreDirective: string | undefined = undefined;
+	let schemaValidationSeverity: SeverityLevel | undefined = undefined;
+	let schemaRequestSeverity: SeverityLevel | undefined = undefined;
 
 	// The settings have changed. Is sent on server activation as well.
 	connection.onDidChangeConfiguration((change) => {
@@ -266,6 +277,8 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 		tabSizeOption = settings.json5?.format?.tabSize === false ? undefined : settings.json5?.format?.tabSize;
 		startIgnoreDirective = settings.json5?.format?.startIgnoreDirective;
 		endIgnoreDirective = settings.json5?.format?.endIgnoreDirective;
+		schemaValidationSeverity = settings.json5?.validate?.schemaValidation;
+		schemaRequestSeverity = settings.json5?.validate?.schemaRequest;
 
 		updateConfiguration();
 
@@ -323,6 +336,10 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 			return await validateTextDocument(document);
 		}
 		return [];
+	});
+
+	connection.onNotification(ForceValidateAllRequest.type, () => {
+		diagnosticsSupport?.requestRefresh();
 	});
 
 	connection.onRequest(LanguageStatusRequest.type, async uri => {
@@ -398,18 +415,21 @@ export function startServer(connection: Connection, runtime: RuntimeEnvironment)
 			return []; // ignore empty documents
 		}
 		const jsonDocument = getJSONDocument(textDocument);
-		const documentSettings: DocumentLanguageSettings = {};
+		const documentSettings: DocumentLanguageSettings = {
+			schemaValidation: schemaValidationSeverity,
+			schemaRequest: schemaRequestSeverity,
+		};
 		return await languageService.doValidation(textDocument, jsonDocument, documentSettings);
 	}
 
 	connection.onDidChangeWatchedFiles((change) => {
 		// Monitored files have changed in VSCode
 		let hasChanges = false;
-		change.changes.forEach(c => {
+		for (const c of change.changes) {
 			if (languageService.resetSchema(c.uri)) {
 				hasChanges = true;
 			}
-		});
+		}
 		if (hasChanges) {
 			diagnosticsSupport?.requestRefresh();
 		}

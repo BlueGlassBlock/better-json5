@@ -1,8 +1,8 @@
 {
 	"json5.schemas.desc": "将 schema 关联到当前项目中的 JSON5 文件。",
-	"json5.schemas.url.desc": "schema 的 URL 或绝对文件路径。在工作区和工作区文件夹设置中，可以使用以 './' 开头的相对路径。",
-	"json5.schemas.fileMatch.desc": "用于在解析 JSON5 文件到 schema 时进行匹配的文件模式数组。`*` 和 '**' 可用作通配符。也可以定义以 '!' 开头的排除模式。当至少有一个匹配模式且最后一个匹配模式不是排除模式时，文件匹配。",
-	"json5.schemas.fileMatch.item.desc": "用于在解析 JSON5 文件到 schema 时进行匹配的文件模式，可以包含 '*' 和 '**'。以 '!' 开头时，定义为排除模式。",
+	"json5.schemas.url.desc": "schema 的 URL 或绝对文件路径。在工作区和工作区文件夹设置中，可以使用以 `./` 开头的相对路径。",
+	"json5.schemas.fileMatch.desc": "用于在解析 JSON5 文件到 schema 时进行匹配的文件模式数组。`*` 和 `**` 可用作通配符。也可以定义以 `!` 开头的排除模式。当至少有一个匹配模式且最后一个匹配模式不是排除模式时，文件匹配。",
+	"json5.schemas.fileMatch.item.desc": "用于在解析 JSON5 文件到 schema 时进行匹配的文件模式，可以包含 `*` 和 `**`。以 `!` 开头时，定义为排除模式。",
 	"json5.schemas.schema.desc": "给定 URL 的 schema 定义。仅当需要避免访问 schema URL 时才需要提供 schema。",
 	"json5.format.enable.desc": "启用/禁用默认的 JSON5 格式化",
 	"json5.format.keepLines.desc": "格式化时保留所有现有的换行符。",
@@ -20,6 +20,8 @@
 	"json5.maxItemsComputed.desc": "计算的大纲符号和折叠区域的最大数量（出于性能原因有限制）。",
 	"json5.maxItemsExceededInformation.desc": "超出最大大纲符号和折叠区域数量时显示的通知。",
 	"json5.enableSchemaDownload.desc": "启用后，可以从 http 和 https 位置获取 JSON schema。",
+	"json5.schemaDownload.trustedDomains.desc": "可信任的 JSON schema 下载 URL 和域名列表。使用 `*` 作为子域名的通配符。值为 `true` 表示该域名/URL 受信任，`false` 表示被阻止。",
+	"json5.workspaceTrust": "在不受信任的工作区中，schema 下载已被禁用。仅使用扩展捆绑的本地 schema。",
 	"json5.command.clearCache": "清除 schema 缓存",
 	"json5.command.sort": "排序文档"
 }

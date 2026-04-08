@@ -10,20 +10,51 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"problemMatcher": [
-				"$ts-webpack",
-				"$tslint-webpack"
-			]
+			"problemMatcher": {
+				"owner": "esbuild",
+				"fileLocation": ["relative", "${workspaceFolder}"],
+				"pattern": [
+					{
+						"regexp": "^.*\\[(ERROR|WARNING)\\]\\s+(.+)$",
+						"severity": 1,
+						"message": 2
+					},
+					{
+						"regexp": "^\\s+(.+):(\\d+):(\\d+):$",
+						"file": 1,
+						"line": 2,
+						"column": 3
+					}
+				]
+			}
 		},
 		{
 			"type": "npm",
 			"script": "watch",
 			"group": "build",
 			"isBackground": true,
-			"problemMatcher": [
-				"$ts-webpack-watch",
-				"$tslint-webpack-watch"
-			]
+			"problemMatcher": {
+				"owner": "esbuild",
+				"fileLocation": ["relative", "${workspaceFolder}"],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "\\[watch\\] build started",
+					"endsPattern": "\\[watch\\] build finished"
+				},
+				"pattern": [
+					{
+						"regexp": "^.*\\[(ERROR|WARNING)\\]\\s+(.+)$",
+						"severity": 1,
+						"message": 2
+					},
+					{
+						"regexp": "^\\s+(.+):(\\d+):(\\d+):$",
+						"file": 1,
+						"line": 2,
+						"column": 3
+					}
+				]
+			}
 		}
 	]
 }

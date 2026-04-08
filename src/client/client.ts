@@ -7,9 +7,9 @@ export type JSONLanguageStatus = { schemas: string[] };
 
 import {
 	workspace, window, languages, commands, LogOutputChannel, ExtensionContext, extensions, Uri, ColorInformation,
-	Diagnostic, StatusBarAlignment, TextEditor, TextDocument, FormattingOptions, CancellationToken, FoldingRange,
+	Diagnostic, TextDocument, FormattingOptions, CancellationToken, FoldingRange,
 	ProviderResult, TextEdit, Range, Position, Disposable, CompletionItem, CompletionList, CompletionContext, Hover, MarkdownString, FoldingContext, DocumentSymbol, SymbolInformation, l10n,
-	RelativePattern
+	RelativePattern, CodeAction, CodeActionKind, CodeActionContext, QuickPickItem, ConfigurationTarget
 } from 'vscode';
 import {
 	LanguageClientOptions, RequestType, NotificationType, FormattingOptions as LSPFormattingOptions, DocumentDiagnosticReportKind, Diagnostic as LSPDiagnostic,
@@ -18,8 +18,9 @@ import {
 } from 'vscode-languageclient';
 
 import { hash } from './utils/hash';
-import { createDocumentSymbolsLimitItem, createLanguageStatusItem, createLimitStatusItem } from './languageStatus';
+import { createDocumentSymbolsLimitItem, createLanguageStatusItem, createLimitStatusItem, createSchemaLoadIssueItem, createSchemaLoadStatusItem } from './languageStatus';
 import { getLanguageParticipants, LanguageParticipants } from './languageParticipants';
+import { matchesUrlPattern } from './utils/urlMatch';
 
 namespace VSCodeContentRequest {
 	export const type: RequestType<string, string, any> = new RequestType('vscode/content');
@@ -38,7 +39,7 @@ namespace LanguageStatusRequest {
 }
 
 namespace ValidateContentRequest {
-	export const type: RequestType<{ schemaUri: string, content: string }, LSPDiagnostic[], any> = new RequestType('json5/validateContent');
+	export const type: RequestType<{ schemaUri: string; content: string }, LSPDiagnostic[], any> = new RequestType('json5/validateContent');
 }
 
 interface SortOptions extends LSPFormattingOptions {
@@ -123,6 +124,7 @@ export namespace SettingIds {
 
 	export const enableValidation = 'json5.validate.enable';
 	export const enableSchemaDownload = 'json5.schemaDownload.enable';
+	export const trustedDomains = 'json5.schemaDownload.trustedDomains';
 	export const maxItemsComputed = 'json5.maxItemsComputed';
 	export const decorateAllColors = 'json5.decorateAllColors';
 	export const editorFoldingMaximumRegions = 'editor.foldingMaximumRegions';
@@ -131,6 +133,17 @@ export namespace SettingIds {
 	export const editorSection = 'editor';
 	export const foldingMaximumRegions = 'foldingMaximumRegions';
 	export const colorDecoratorsLimit = 'colorDecoratorsLimit';
+}
+
+export namespace CommandIds {
+	export const workbenchActionOpenSettings = 'workbench.action.openSettings';
+	export const workbenchTrustManage = 'workbench.trust.manage';
+	export const retryResolveSchemaCommandId = '_json5.retryResolveSchema';
+	export const configureTrustedDomainsCommandId = '_json5.configureTrustedDomains';
+	export const showAssociatedSchemaList = '_json5.showAssociatedSchemaList';
+	export const clearCacheCommandId = 'json5.clearCache';
+	export const validateCommandId = 'json5.validate';
+	export const sortCommandId = 'json5.sort';
 }
 
 export interface TelemetryReporter {
@@ -154,6 +167,16 @@ export interface Runtime {
 export interface SchemaRequestService {
 	getContent(uri: string): Promise<string>;
 	clearCache?(): Promise<string[]>;
+}
+
+export enum SchemaRequestServiceErrors {
+	UntrustedWorkspaceError = 1,
+	UntrustedSchemaError = 2,
+	OpenTextDocumentAccessError = 3,
+	HTTPDisabledError = 4,
+	HTTPError = 5,
+	VSCodeAccessError = 6,
+	UntitledAccessError = 7,
 }
 
 export const languageServerDescription = l10n.t('JSON5 Language Server');
@@ -202,24 +225,25 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 	const toDispose: Disposable[] = [];
 
 	let rangeFormatting: Disposable | undefined = undefined;
+	let settingsCache: Settings | undefined = undefined;
+	let schemaAssociationsCache: Promise<ISchemaAssociation[]> | undefined = undefined;
 
 	const documentSelector = languageParticipants.documentSelector;
 
-	const schemaResolutionErrorStatusBarItem = window.createStatusBarItem('status.json5.resolveError', StatusBarAlignment.Right, 0);
-	schemaResolutionErrorStatusBarItem.name = l10n.t('JSON5: Schema Resolution Error');
-	schemaResolutionErrorStatusBarItem.text = '$(alert)';
-	toDispose.push(schemaResolutionErrorStatusBarItem);
-
 	const fileSchemaErrors = new Map<string, string>();
-	let schemaDownloadEnabled = true;
+	let schemaDownloadEnabled = !!workspace.getConfiguration().get(SettingIds.enableSchemaDownload);
+	let trustedDomains = workspace.getConfiguration().get<Record<string, boolean>>(SettingIds.trustedDomains, {});
 
 	let isClientReady = false;
 
 	const documentSymbolsLimitStatusbarItem = createLimitStatusItem((limit: number) => createDocumentSymbolsLimitItem(documentSelector, SettingIds.maxItemsComputed, limit));
 	toDispose.push(documentSymbolsLimitStatusbarItem);
 
-	toDispose.push(commands.registerCommand('json5.clearCache', async () => {
-		client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings() }); // Push latest settings just in case
+	const schemaLoadStatusItem = createSchemaLoadStatusItem((diagnostic: Diagnostic) => createSchemaLoadIssueItem(documentSelector, schemaDownloadEnabled, diagnostic));
+	toDispose.push(schemaLoadStatusItem);
+
+	toDispose.push(commands.registerCommand(CommandIds.clearCacheCommandId, async () => {
+		client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings(true) }); // Push latest settings just in case
 		if (isClientReady && runtime.schemaRequests.clearCache) {
 			const cachedSchemas = await runtime.schemaRequests.clearCache();
 			await client.sendNotification(SchemaContentChangeNotification.type, cachedSchemas);
@@ -227,12 +251,12 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		window.showInformationMessage(l10n.t('JSON5 schema cache fully cleared.'));
 	}));
 
-	toDispose.push(commands.registerCommand('json5.validate', async (schemaUri: Uri, content: string) => {
+	toDispose.push(commands.registerCommand(CommandIds.validateCommandId, async (schemaUri: Uri, content: string) => {
 		const diagnostics: LSPDiagnostic[] = await client.sendRequest(ValidateContentRequest.type, { schemaUri: schemaUri.toString(), content });
 		return diagnostics.map(client.protocol2CodeConverter.asDiagnostic);
 	}));
 
-	toDispose.push(commands.registerCommand('json5.sort', async () => {
+	toDispose.push(commands.registerCommand(CommandIds.sortCommandId, async () => {
 
 		if (isClientReady) {
 			const textEditor = window.activeTextEditor;
@@ -252,17 +276,10 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		}
 	}));
 
-	function filterSchemaErrorDiagnostics(uri: Uri, diagnostics: Diagnostic[]): Diagnostic[] {
-		const schemaErrorIndex = diagnostics.findIndex(isSchemaResolveError);
-		if (schemaErrorIndex !== -1) {
-			const schemaResolveDiagnostic = diagnostics[schemaErrorIndex];
-			fileSchemaErrors.set(uri.toString(), schemaResolveDiagnostic.message);
-			if (!schemaDownloadEnabled) {
-				diagnostics = diagnostics.filter(d => !isSchemaResolveError(d));
-			}
-			if (window.activeTextEditor && window.activeTextEditor.document.uri.toString() === uri.toString()) {
-				schemaResolutionErrorStatusBarItem.show();
-			}
+	function handleSchemaErrorDiagnostics(uri: Uri, diagnostics: Diagnostic[]): Diagnostic[] {
+		schemaLoadStatusItem.update(uri, diagnostics);
+		if (!schemaDownloadEnabled) {
+			return diagnostics.filter(d => !isSchemaResolveError(d));
 		}
 		return diagnostics;
 	}
@@ -284,18 +301,18 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		},
 		middleware: {
 			workspace: {
-				didChangeConfiguration: () => client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings() })
+				didChangeConfiguration: () => client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings(true) })
 			},
 			provideDiagnostics: async (uriOrDoc, previousResolutId, token, next) => {
 				const diagnostics = await next(uriOrDoc, previousResolutId, token);
 				if (diagnostics && diagnostics.kind === DocumentDiagnosticReportKind.Full) {
 					const uri = uriOrDoc instanceof Uri ? uriOrDoc : uriOrDoc.uri;
-					diagnostics.items = filterSchemaErrorDiagnostics(uri, diagnostics.items);
+					diagnostics.items = handleSchemaErrorDiagnostics(uri, diagnostics.items);
 				}
 				return diagnostics;
 			},
 			handleDiagnostics: (uri: Uri, diagnostics: Diagnostic[], next: HandleDiagnosticsSignature) => {
-				diagnostics = filterSchemaErrorDiagnostics(uri, diagnostics);
+				diagnostics = handleSchemaErrorDiagnostics(uri, diagnostics);
 				next(uri, diagnostics);
 			},
 			// testing the replace / insert mode
@@ -387,7 +404,7 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		const uri = Uri.parse(uriPath);
 		const uriString = uri.toString(true);
 		if (uri.scheme === 'untitled') {
-			throw new ResponseError(3, l10n.t('Unable to load {0}', uriString));
+			throw new ResponseError(SchemaRequestServiceErrors.UntitledAccessError, l10n.t('Unable to load {0}', uriString));
 		}
 		if (uri.scheme === 'vscode') {
 			try {
@@ -396,7 +413,7 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 				const content = await workspace.fs.readFile(uri);
 				return new TextDecoder().decode(content);
 			} catch (e) {
-				throw new ResponseError(5, e.toString(), e);
+				throw new ResponseError(SchemaRequestServiceErrors.VSCodeAccessError, e.toString(), e);
 			}
 		} else if (uri.scheme !== 'http' && uri.scheme !== 'https') {
 			try {
@@ -404,16 +421,22 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 				schemaDocuments[uriString] = true;
 				return document.getText();
 			} catch (e) {
-				throw new ResponseError(2, e.toString(), e);
+				throw new ResponseError(SchemaRequestServiceErrors.OpenTextDocumentAccessError, e.toString(), e);
 			}
 		} else if (schemaDownloadEnabled) {
+			if (!workspace.isTrusted) {
+				throw new ResponseError(SchemaRequestServiceErrors.UntrustedWorkspaceError, l10n.t('Downloading schemas is disabled in untrusted workspaces'));
+			}
+			if (!await isTrusted(uri)) {
+				throw new ResponseError(SchemaRequestServiceErrors.UntrustedSchemaError, l10n.t('Location {0} is untrusted', uriString));
+			}
 			try {
 				return await runtime.schemaRequests.getContent(uriString);
 			} catch (e) {
-				throw new ResponseError(4, e.toString());
+				throw new ResponseError(SchemaRequestServiceErrors.HTTPError, e.toString(), e);
 			}
 		} else {
-			throw new ResponseError(1, l10n.t('Downloading schemas is disabled through setting \'{0}\'', SettingIds.enableSchemaDownload));
+			throw new ResponseError(SchemaRequestServiceErrors.HTTPDisabledError, l10n.t('Downloading schemas is disabled through setting \'{0}\'', SettingIds.enableSchemaDownload));
 		}
 	});
 
@@ -427,19 +450,6 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 			return true;
 		}
 		return false;
-	};
-	const handleActiveEditorChange = (activeEditor?: TextEditor) => {
-		if (!activeEditor) {
-			return;
-		}
-
-		const activeDocUri = activeEditor.document.uri.toString();
-
-		if (activeDocUri && fileSchemaErrors.has(activeDocUri)) {
-			schemaResolutionErrorStatusBarItem.show();
-		} else {
-			schemaResolutionErrorStatusBarItem.hide();
-		}
 	};
 	const handleContentClosed = (uriString: string) => {
 		if (handleContentChange(uriString)) {
@@ -485,32 +495,69 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 	toDispose.push(workspace.onDidChangeTextDocument(e => handleContentChange(e.document.uri.toString())));
 	toDispose.push(workspace.onDidCloseTextDocument(d => handleContentClosed(d.uri.toString())));
 
-	toDispose.push(window.onDidChangeActiveTextEditor(handleActiveEditorChange));
+	function triggerValidation() {
+		client.sendRequest(ForceValidateRequest.type, '');
+	}
 
-	const handleRetryResolveSchemaCommand = () => {
-		if (window.activeTextEditor) {
-			schemaResolutionErrorStatusBarItem.text = '$(watch)';
-			const activeDocUri = window.activeTextEditor.document.uri.toString();
-			client.sendRequest(ForceValidateRequest.type, activeDocUri).then((diagnostics) => {
-				const schemaErrorIndex = diagnostics.findIndex(isSchemaResolveError);
-				if (schemaErrorIndex !== -1) {
-					// Show schema resolution errors in status bar only; ref: #51032
-					const schemaResolveDiagnostic = diagnostics[schemaErrorIndex];
-					fileSchemaErrors.set(activeDocUri, schemaResolveDiagnostic.message);
-				} else {
-					schemaResolutionErrorStatusBarItem.hide();
-				}
-				schemaResolutionErrorStatusBarItem.text = '$(alert)';
-			});
+	toDispose.push(commands.registerCommand(CommandIds.retryResolveSchemaCommandId, triggerValidation));
+
+	toDispose.push(commands.registerCommand(CommandIds.configureTrustedDomainsCommandId, async (errorData?: { uri: string }) => {
+		const items: (QuickPickItem & { id: string })[] = [];
+		if (errorData) {
+			const uri = Uri.parse(errorData.uri);
+			if (uri.authority) {
+				items.push({ id: 'trustDomain', label: l10n.t('Trust domain \'{0}\'', uri.authority), description: errorData.uri });
+			}
+			items.push({ id: 'trustURI', label: l10n.t('Trust URI \'{0}\'', errorData.uri), description: errorData.uri });
 		}
-	};
+		items.push({ id: 'configure', label: l10n.t('Configure Trusted Domains...') });
+		const result = await window.showQuickPick(items, { placeHolder: l10n.t('Configure trusted domains for JSON5 schema download') });
+		if (result) {
+			if (result.id === 'trustDomain') {
+				const uri = Uri.parse(errorData!.uri);
+				trustedDomains[uri.authority] = true;
+				await workspace.getConfiguration().update(SettingIds.trustedDomains, trustedDomains, ConfigurationTarget.Global);
+			} else if (result.id === 'trustURI') {
+				trustedDomains[errorData!.uri] = true;
+				await workspace.getConfiguration().update(SettingIds.trustedDomains, trustedDomains, ConfigurationTarget.Global);
+			} else {
+				commands.executeCommand(CommandIds.workbenchActionOpenSettings, SettingIds.trustedDomains);
+			}
+			triggerValidation();
+		}
+	}));
 
-	toDispose.push(commands.registerCommand('_json5.retryResolveSchema', handleRetryResolveSchemaCommand));
+	// Code action provider for schema errors
+	toDispose.push(languages.registerCodeActionsProvider(documentSelector, {
+		provideCodeActions(_document: TextDocument, _range: Range, context: CodeActionContext): CodeAction[] {
+			const codeActions: CodeAction[] = [];
+			for (const diagnostic of context.diagnostics) {
+				if (isSchemaResolveError(diagnostic)) {
+					const errorCode = diagnostic.code;
+					if (typeof errorCode === 'number') {
+						if (errorCode === SchemaRequestServiceErrors.UntrustedSchemaError) {
+							const configureAction = new CodeAction(l10n.t('Configure Trusted Domains...'), CodeActionKind.QuickFix);
+							configureAction.command = { command: CommandIds.configureTrustedDomainsCommandId, title: '', arguments: [diagnostic.message ? { uri: diagnostic.message } : undefined] };
+							configureAction.diagnostics = [diagnostic];
+							codeActions.push(configureAction);
+						}
+						if (errorCode === SchemaRequestServiceErrors.HTTPDisabledError) {
+							const enableAction = new CodeAction(l10n.t('Enable Schema Download'), CodeActionKind.QuickFix);
+							enableAction.command = { command: CommandIds.workbenchActionOpenSettings, title: '', arguments: [SettingIds.enableSchemaDownload] };
+							enableAction.diagnostics = [diagnostic];
+							codeActions.push(enableAction);
+						}
+					}
+				}
+			}
+			return codeActions;
+		}
+	}, { providedCodeActionKinds: [CodeActionKind.QuickFix] }));
 
 	client.sendNotification(SchemaAssociationNotification.type, await getSchemaAssociations());
 
 	toDispose.push(extensions.onDidChange(async _ => {
-		client.sendNotification(SchemaAssociationNotification.type, await getSchemaAssociations());
+		client.sendNotification(SchemaAssociationNotification.type, await getSchemaAssociations(true));
 	}));
 
 	const associationWatcher = workspace.createFileSystemWatcher(new RelativePattern(
@@ -519,23 +566,29 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 	));
 	toDispose.push(associationWatcher);
 	toDispose.push(associationWatcher.onDidChange(async _ => {
-		client.sendNotification(SchemaAssociationNotification.type, await getSchemaAssociations());
+		client.sendNotification(SchemaAssociationNotification.type, await getSchemaAssociations(true));
 	}))
 
 	// manually register / deregister format provider based on the `json5.format.enable` setting avoiding issues with late registration. See #71652.
 	updateFormatterRegistration();
 	toDispose.push({ dispose: () => rangeFormatting && rangeFormatting.dispose() });
 
-	updateSchemaDownloadSetting();
-
 	toDispose.push(workspace.onDidChangeConfiguration(e => {
 		if (e.affectsConfiguration(SettingIds.enableFormatter)) {
 			updateFormatterRegistration();
-		} else if (e.affectsConfiguration(SettingIds.enableSchemaDownload)) {
-			updateSchemaDownloadSetting();
 		}
-		client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings() });
+		if (e.affectsConfiguration(SettingIds.enableSchemaDownload)) {
+			schemaDownloadEnabled = workspace.getConfiguration().get(SettingIds.enableSchemaDownload) !== false;
+			triggerValidation();
+		}
+		if (e.affectsConfiguration(SettingIds.trustedDomains)) {
+			trustedDomains = workspace.getConfiguration().get<Record<string, boolean>>(SettingIds.trustedDomains, {});
+			triggerValidation();
+		}
+		client.sendNotification(DidChangeConfigurationNotification.type, { settings: getSettings(true) });
 	}));
+
+	toDispose.push(workspace.onDidGrantWorkspaceTrust(() => triggerValidation()));
 
 	toDispose.push(createLanguageStatusItem(documentSelector, (uri: string) => client.sendRequest(LanguageStatusRequest.type, uri)));
 
@@ -571,18 +624,6 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		}
 	}
 
-	function updateSchemaDownloadSetting() {
-		schemaDownloadEnabled = workspace.getConfiguration().get(SettingIds.enableSchemaDownload) !== false;
-		if (schemaDownloadEnabled) {
-			schemaResolutionErrorStatusBarItem.tooltip = l10n.t('Unable to resolve schema. Click to retry.');
-			schemaResolutionErrorStatusBarItem.command = '_json5.retryResolveSchema';
-			handleRetryResolveSchemaCommand();
-		} else {
-			schemaResolutionErrorStatusBarItem.tooltip = l10n.t('Downloading schemas is disabled. Click to configure.');
-			schemaResolutionErrorStatusBarItem.command = { command: 'workbench.action.openSettings', arguments: [SettingIds.enableSchemaDownload], title: '' };
-		}
-	}
-
 	async function getSortTextEdits(document: TextDocument, tabSize: string | number = 4, insertSpaces: string | boolean = true): Promise<TextEdit[]> {
 		const filesConfig = workspace.getConfiguration('files', document);
 		const options: SortOptions = {
@@ -606,6 +647,44 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 		});
 	}
 
+	function getSchemaAssociations(forceRefresh?: boolean): Promise<ISchemaAssociation[]> {
+		if (forceRefresh || !schemaAssociationsCache) {
+			schemaAssociationsCache = computeSchemaAssociations();
+		}
+		return schemaAssociationsCache;
+	}
+
+	function getSettings(forceRefresh?: boolean): Settings {
+		if (forceRefresh || !settingsCache) {
+			settingsCache = computeSettings();
+		}
+		return settingsCache;
+	}
+
+	async function isTrusted(uri: Uri): Promise<boolean> {
+		const uriString = uri.toString();
+		if (trustedDomains[uriString] || trustedDomains[uri.authority]) {
+			return true;
+		}
+		// check if associated through well-known schemas (settings, extensions)
+		const associations = await getSchemaAssociations();
+		for (const association of associations) {
+			if (association.uri === uriString) {
+				return true;
+			}
+		}
+		// check if listed in settings schemas
+		const settingsSchemas = getSettings().json5?.schemas;
+		if (settingsSchemas) {
+			for (const schema of settingsSchemas) {
+				if (schema.url === uriString) {
+					return true;
+				}
+			}
+		}
+		return matchesUrlPattern(uri, trustedDomains);
+	}
+
 	return {
 		dispose: async () => {
 			await client.stop();
@@ -615,7 +694,7 @@ async function startClientWithParticipants(_context: ExtensionContext, languageP
 	};
 }
 
-async function getSchemaAssociations(): Promise<ISchemaAssociation[]> {
+async function computeSchemaAssociations(): Promise<ISchemaAssociation[]> {
 	return getSchemaExtensionAssociations()
 		.concat(await getDynamicSchemaAssociations());
 }
@@ -674,7 +753,7 @@ async function getDynamicSchemaAssociations(): Promise<ISchemaAssociation[]> {
 	return result;
 }
 
-function getSettings(): Settings {
+function computeSettings(): Settings {
 	const configuration = workspace.getConfiguration();
 	const httpSettings = workspace.getConfiguration('http');
 
@@ -799,7 +878,7 @@ function getSchemaId(schema: JSONSchemaSettings, settingsLocation?: Uri): string
 }
 
 function isThenable<T>(obj: ProviderResult<T>): obj is Thenable<T> {
-	return obj && (<any>obj)['then'];
+	return !!obj && (<unknown>obj as Record<string, unknown>)['then'] !== undefined;
 }
 
 function updateMarkdownString(h: MarkdownString): MarkdownString {
@@ -808,6 +887,10 @@ function updateMarkdownString(h: MarkdownString): MarkdownString {
 	return n;
 }
 
-function isSchemaResolveError(d: Diagnostic) {
-	return d.code === /* SchemaResolveError */ 0x300;
+export function isSchemaResolveError(d: Diagnostic) {
+	return typeof d.code === 'number' && (d.code & ErrorCodes.SchemaResolveError) === ErrorCodes.SchemaResolveError;
+}
+
+export namespace ErrorCodes {
+	export const SchemaResolveError = 0x10000;
 }
