@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri } from 'vscode';
+import { Uri, workspace } from 'vscode';
+
+const sharedTrustedDomainsSetting = 'json.schemaDownload.trustedDomains';
 
 /**
  * Check whether a URL matches the list of trusted domains or URIs.
@@ -22,7 +24,13 @@ export function matchesUrlPattern(url: Uri, trustedDomains: Record<string, boole
 		return true;
 	}
 
-	for (const [pattern, isTrusted] of Object.entries(trustedDomains)) {
+	const sharedTrustedDomains = workspace.getConfiguration().get<Record<string, boolean>>(sharedTrustedDomainsSetting, {});
+	const trustedDomainEntries = [
+		...Object.entries(trustedDomains),
+		...Object.entries(sharedTrustedDomains),
+	];
+
+	for (const [pattern, isTrusted] of trustedDomainEntries) {
 		if (typeof pattern !== 'string' || pattern.trim() === '') {
 			continue;
 		}
